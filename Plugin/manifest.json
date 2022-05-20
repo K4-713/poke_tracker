@@ -1,0 +1,38 @@
+{
+    "manifest_version": 3,
+    "name": "PokeTracker",
+    "version": "1.0",
+
+    "description": "Gotta Grab 'Em All (By The Data)",
+
+    "icons": {
+	"48": "icons/crazy.svg",
+	"96": "icons/crazy.svg"
+    },
+    
+
+
+    "content_scripts": [
+	{
+	    "matches": ["*://*.serebii.net/pokedex-xy/*"],
+	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_g6.js"]
+	}
+    ],
+    "host_permissions": [
+	"https://poketracker.hownottospellwinnebago.com/*",
+	"*://serebii.net/*",
+	"*://*.serebii.net/*"
+    ],
+    "permissions": [
+        "webRequest",
+        "declarativeNetRequest"
+    ],
+    
+    "declarative_net_request": {
+      "rule_resources": [{
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }]
+    }
+}

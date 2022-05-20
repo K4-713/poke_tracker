@@ -1,0 +1,77 @@
+/*
+Copyright (C) 2020 K4-713 <k4@hownottospellwinnebago.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/* 
+    Created on : Jan 16, 2020, 11:44:36 AM
+    Author     : K4-713 <k4@hownottospellwinnebago.com>
+*/
+
+.small { font-size: 12px; font-family:arial;}
+.small td { padding:2px; padding-left: 5px; padding-right:12px; }
+.attention { background-color: #ffcc77}
+.long { min-width:225px }
+.copy_img, .zero_img { width:12px; height:12px; padding:0px 0px 0px 12px; margin:0px;}
+.check_img { width:16px; height:16px; padding:0px; margin:0px;}
+.arrow_img { width:8px; height:8px; padding:0px 0px 0px 3px; margin:0px;}
+.best_jn { color: #7777ff }
+.best_tp { color: #559955 }
+.too_new { color: #cccccc }
+.searched_today { color: #cccccc }
+.not_searched_today { color: #770000 }
+.copy_highlighted { background-color: #ffcc77}
+.completed { background-color:#bbaabb }
+.small_diff { color: #7777ff; font-weight:bold }
+.medium_diff { color: #aa00ff; font-weight:bold }
+.large_diff { color: #cc00ff; font-weight:bold }
+.sold_out { background-color:#eeddff }
+div.topnav {border-bottom: 2px solid black; background-color: #fff0dd }
+div.topnav a { text-decoration: none; font-family:arial; font-weight:bold; font-size:12px; color:444444 }
+div.topnav a:hover { text-decoration:overline underline; color:#cc9900 }
+table { overflow-x: scroll; table-layout: fixed; border:1px solid #dddddd; }
+table.structure { overflow-x: hidden; table-layout: fixed; border:0px; padding:0px; margin:0px }
+.structure td { border:0px; padding:0px; margin:0px }
+td { white-space:nowrap; border-bottom: 1px solid #bbbbbb; border-right: 1px dashed #bbbbbb }
+tr.header { background-color:#cccccc } 
+tr.header td { white-space:normal; font-weight:bold; }
+h1, h2 { font-family:Lato, sans-serif; margin-bottom:5px; }
+.left { float:left; clear:none }
+.right { float:right; clear:none }
+.nudge_down { margin-top: 4px; }
+
+svg.graph { background-color:#f5f5f5; margin:30px; padding:20px }
+path { stroke:#000000; fill:none }
+path.total_sales_line { stroke: #773377 }
+
+
+.grey_out_image {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+
+.opacity_50{
+    opacity: 0.5;
+}
+
+/* D3 experiment */
+.sparkline {
+    fill: none;
+    stroke: #000;
+    stroke-width: 0.5px;
+}
+.sparkcircle {
+    fill: #f00;
+    stroke: none;
+}
