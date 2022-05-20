@@ -94,12 +94,22 @@ function get_time() {
 function get_ints(int_string) {
     //basically, remove anything that isn't a number.
     //gonna assume the number is all in one place, and uninterrupted by commas
-    var ints = rarity_string.match(/(\d+)/);
+    var ints = int_string.match(/(\d+)/);
     if (ints) {
-	return ints[0];
+	return parseInt(ints[0]);
     } else {
 	return false;
     }
+}
+
+function get_type_from_link(link) {
+  //example: "/pokemon/type/grass"
+  var type_array = link.split('/');
+  return capitalize(type_array[3]);
+}
+
+function capitalize(word){
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
 

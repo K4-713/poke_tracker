@@ -9,13 +9,15 @@
 	"48": "icons/crazy.svg",
 	"96": "icons/crazy.svg"
     },
-    
-
 
     "content_scripts": [
 	{
 	    "matches": ["*://*.serebii.net/pokedex-xy/*"],
 	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_g6.js"]
+	},
+	{
+	    "matches": ["*://*.serebii.net/pokemon/nationalpokedex.shtml"],
+	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_natdex.js"]
 	}
     ],
     "host_permissions": [
