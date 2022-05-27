@@ -63,18 +63,21 @@ function parse_natdex_row(tr){
   //handle types
   var types = $(tds.eq(3)).children();
   row_data.type1 = get_type_from_link(types.eq(0).attr('href'));
+  row_data.type2 = null;
   if (types.length > 1){
     row_data.type2 = get_type_from_link(types.eq(1).attr('href'));
   }
   
   //and abilities
   var abilities = $(tds.eq(4)).children('a');
-  row_data.ability_1 = abilities.eq(0).text().trim();
+  row_data.ability1 = abilities.eq(0).text().trim();
+  row_data.ability2 = null;
+  row_data.ability_hidden = null;
   if (abilities.length === 2){
     row_data.ability_hidden = abilities.eq(1).text().trim();
   }
   if (abilities.length === 3){
-    row_data.ability_2 = abilities.eq(1).text().trim();
+    row_data.ability2 = abilities.eq(1).text().trim();
     row_data.ability_hidden = abilities.eq(2).text().trim();
   }
   

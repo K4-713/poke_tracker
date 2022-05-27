@@ -105,8 +105,8 @@ function handle_request($data) {
 
     switch ($action) {
 	case 'natdex_index':
-      $rowcount = db_query($action, 'insert_update', $data['rows']);
-      if ($rowcount > 0) {
+            $rowcount = db_multi_query($action, 'insert_update', $data['rows']);
+            if ($rowcount > 0) {
 		return_result('success', "$action: $rowcount rows updated");
 	    } else {
 		return_result('failure', "Problem writing to the database");
@@ -143,9 +143,9 @@ function get_data_model_info($action) {
       'name' => 'varchar_32',
       'type1' => 'varchar_16',
       'type2' => 'varchar_16|null',
-      'ability_1' => 'varchar_16',
-      'ability_2' => 'varchar_16|null',
-      'ability_hidden' => 'varchar_16|null',
+      'ability1' => 'varchar_16',
+        'ability2' => 'varchar_16|null',
+        'ability_hidden' => 'varchar_16|null',
       'b_att' => 'int',
       'b_def' => 'int',
       'b_hp' => 'int',
@@ -155,8 +155,9 @@ function get_data_model_info($action) {
       'dex_national' => 'int'
   );
   $model_info['natdex_index']['insert_update'] = query_build($model_info['natdex_index']['data'], 'insert_update', 'mons');
+    error_log(__FUNCTION__ . ' QUERY="' . $model_info['natdex_index']['insert_update']['query'] . '"');
 
-  //and finally return
+    //and finally return
     if (array_key_exists($action, $model_info)) {
 	return $model_info[$action];
     }
@@ -215,6 +216,8 @@ function db_query($action, $query_type, $data) {
 	'bind_param'
     );
 
+    error_log("Binding? '" . $params[0] . "'");
+
     //for the record, I definitely hate myself by now.
     call_user_func_array($call_me, $params);
 
@@ -235,7 +238,20 @@ function db_query($action, $query_type, $data) {
     return $rowcount;
   }
 
-  function query_build($structure, $query_type, $table) {
+  function db_multi_query($action, $query_type, $data, $chunk_size = 20) {
+    $chunks = array_chunk($data, $chunk_size);
+    $rowcount = 0;
+    foreach ($chunks as $ehh => $chunk) {
+        $returns = db_query($action, $query_type, $chunk);
+        if ($returns === false) {
+            return false;
+        }
+        $rowcount += $returns;
+    }
+    return $rowcount;
+}
+
+function query_build($structure, $query_type, $table) {
   $query = array();
   switch ($query_type) {
     case 'insert_update' :
@@ -264,8 +280,8 @@ function query_qmarks($structure) {
     if ($qmarks === '') {
       $qmarks = '?';
     } else {
-      $qmarks .= ', ?';
-    }
+      $qmarks .= ',?';
+        }
   }
   return "($qmarks)";
 }
@@ -273,14 +289,14 @@ function query_qmarks($structure) {
 function query_build_odku_values($structure) {
   //more dum
   $odku = '';
-  foreach ($structure as $field => $type) {
-    if ($odku === '') {
-      $odku = "$field = ?";
-    } else {
-      $odku = ", $field = ?";
+    foreach ($structure as $field => $type) {
+        if ($odku === '') {
+            $odku = "$field=?";
+        } else {
+            $odku .= ", $field=?";
+        }
     }
-  }
-  return $odku;
+    return $odku;
 }
 
 function query_get_binding_string($structure) {
@@ -293,6 +309,7 @@ function query_get_binding_string($structure) {
       case 'int':
       case 'bool':
         $binding .= 'i';
+        break;
       case 'varchar':
         $binding .= 's';
         break;
@@ -301,6 +318,7 @@ function query_get_binding_string($structure) {
         break;
     }
   }
+  return $binding;
 }
 
 function save_sdb_item_data($data) {
