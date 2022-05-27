@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2019 K4-713 <k4@hownottospellwinnebago.com>
+ * Copyright (C) 2022 K4-713 <k4@hownottospellwinnebago.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,15 +39,19 @@ function validate($data, $expected_structure) {
 
     foreach ($data as $row => $columns) {
 	//check to see that everything we expect is here, in every row
-	foreach ($expected_structure as $field => $type) {
-	    if (!array_key_exists($field, $data[$row])) {
-		error_log("Data failed to validate - Missing '$field' field in row '$row");
-		error_log(print_r($data, true));
-		return false;
-	    }
-	}
+        foreach ($expected_structure as $field => $type) {
+            if (!array_key_exists($field, $data[$row])) {
+                if (strpos($type, '|null') > 0) {
+                    $data[$row][$field] = NULL;
+                } else {
+                    error_log("Data failed to validate - Missing '$field' field in row '$row");
+                    error_log(print_r($data, true));
+                    return false;
+                }
+            }
+        }
 
-	//make sure the data types are legit
+//make sure the data types are legit
 	foreach ($columns as $column => $value) {
 	    //skip data we aren't going to process anyway
 	    if (!array_key_exists($column, $expected_structure)) {
@@ -185,22 +189,16 @@ function check_varchar_8($value) {
     return check_varchar($value, 8);
 }
 
+function check_varchar_16($value) {
+    return check_varchar($value, 16);
+}
+
 function check_varchar($value, $length) {
     if (strlen($value) > $length) {
 	return false;
     }
     return true;
-}
-
-function check_gourmet_pet_will_eat($item) {
-    global $gourmet_pet_name;
-//    According to me elsewhere: =IF(MOD(LEN(Trim(A1389)), 12) = 0, "won't", "")
-    $item_length = strlen($item); //This isn't zero indexed or anything dum, is it?
-    if ($item_length % strlen($gourmet_pet_name) === 0) {
-	return false;
-    }
-    return true;
-}
+  }
 
 function check_auth_key($key) {
     global $data_auth_key;
@@ -240,7 +238,7 @@ function check_password() {
 function start_page($title) {
     login_check();
     echo "<head>\n"
-    . "<title>Neologger - $title</title>"
+    . "<title>Poke Tracker - $title</title>"
     . "<link rel='stylesheet' href='site.css'>\n"
     . "<script src='libs/jquery-3.4.1.min.js'></script>\n"
     . "<script src='libs/d3/d3.min.js'></script>\n"
@@ -252,14 +250,14 @@ function start_page($title) {
 
 function add_navigation() {
     $links = array(
-	'index.php' => 'Report By Day',
-	'restock.php' => 'Restock Helper',
-	'shop_stock.php' => 'All Shop Stock',
-	'stockpiling.php' => 'Stockpiling and Event Prep',
-	'gc_buy.php' => 'Gourmet Club - What to Buy',
-	'gc_eaten_log.php' => 'Gourmet Club - Eaten Log',
-	'shop_gen.php' => 'Shop Index Generator'
-    );
+	'index.php' => 'National Dex',
+  //      'restock.php' => 'Restock Helper',
+//	'shop_stock.php' => 'All Shop Stock',
+//	'stockpiling.php' => 'Stockpiling and Event Prep',
+//	'gc_buy.php' => 'Gourmet Club - What to Buy',
+//	'gc_eaten_log.php' => 'Gourmet Club - Eaten Log',
+//	'shop_gen.php' => 'Shop Index Generator'
+  );
     $out = '';
     foreach ($links as $file => $text) {
 	//let's just go for a top nav
@@ -381,334 +379,7 @@ function set_setting_value($setting, $value) {
     }
 
     return true;
-}
-
-function get_upper_percentile_rank($item_name, $type) {
-    static $results = null;
-    if ($type !== 'Quest Item') {
-	//error_log(__FUNCTION__ . ": No percentile rank function defined for type $type");
-	return false;
-    }
-
-    if (is_null($results)) {
-	$db = db_connect();
-
-	$query = "SELECT name, rarity, my_subtype FROM items WHERE my_type = 'Quest Item'";
-	$result = $db->query($query);
-
-	if ($result === false) { //something went wrong?
-	    error_log(__FUNCTION__ . ": Error retrieving item information.");
-	    return false;
-	}
-
-	$results = array();
-	$grouping_counts = array();
-	//for each type, save a count for each rarity, and the total
-	while ($row = $result->fetch_assoc()) {
-	    if (!array_key_exists($row['name'], $results)) {
-		$results[$row['name']] = array(
-		    'rarity' => $row['rarity'],
-		    'grouping' => $row['my_subtype']
-		);
-	    }
-	    if (!array_key_exists($row['my_subtype'], $grouping_counts)) {
-		$grouping_counts[$row['my_subtype']] = array(
-		    $row['rarity'] => 1,
-		    'total' => 1
-		);
-	    } else {
-		if (!array_key_exists($row['rarity'], $grouping_counts[$row['my_subtype']])) {
-		    $grouping_counts[$row['my_subtype']][$row['rarity']] = 0;
-		}
-		$grouping_counts[$row['my_subtype']][$row['rarity']] += 1;
-		$grouping_counts[$row['my_subtype']]['total'] += 1;
-	    }
-	}
-
-	//order grouping counts / types by index
-	foreach ($grouping_counts as $type => $info) {
-	    ksort($grouping_counts[$type]);
-	    $info = $grouping_counts[$type]; //doesn't actually do anything with the main array.
-	    $position = 0;
-	    foreach ($info as $key => $value) {
-		if ($key !== 'total') {
-		    $position += $value;
-		    //do math
-		    $grouping_counts[$type][$key] = array(
-			'position' => $position,
-			'percent_rank' => round($position / $info['total'], 2)
-		    );
-		}
-	    }
-	}
-
-	foreach ($results as $name => $info) {
-	    $results[$name]['percent_rank'] = $grouping_counts[$info['grouping']][$info['rarity']]['percent_rank'];
-	}
-
-    }
-    return $results[$item_name]['percent_rank'];
-}
-
-/**
- * Returns the average spent on a particular item by neo_id
- * @param array $neo_ids An array of neo_ids => quantities to average
- * @return array spent averages indexed by neo_id
- */
-function get_batch_spent_averages($neo_ids) {
-    $purchase_history_data = get_batch_purchase_history_data($neo_ids);
-
-    $needs_legacy = array();
-    foreach ($purchase_history_data as $neo_id => $values) {
-	if ($values === false || $values['qty'] < $neo_ids[$neo_id]) {
-	    $needs_legacy[] = $neo_id;
-	}
-    }
-
-    //get the legacy data
-    $legacy_spend = array();
-    if (count($needs_legacy) > 0) {
-	$db = db_connect();
-	$sql = "select neo_id, average from legacy_spend where neo_id IN (" . implode(', ', $needs_legacy) . ")";
-
-	$legacy_qry = $db->query($sql);
-
-	while ($legacy_row = $legacy_qry->fetch_assoc()) {
-	    $legacy_spend[$legacy_row['neo_id']] = $legacy_row['average'];
-	}
-    }
-
-    //now roll them all up and send it back as one number.
-    $return = array();
-    foreach ($purchase_history_data as $neo_id => $values) {
-	$qty = 0;
-	$sum = 0;
-	if ($values !== false) {
-	    $qty = $values['qty'];
-	    $sum = $values['sum'];
-	}
-
-	if ($qty < $neo_ids[$neo_id] && array_key_exists($neo_id, $legacy_spend)) {
-	    $add_qty = $neo_ids[$neo_id] - $qty;
-	    $sum += $add_qty * $legacy_spend[$neo_id];
-	    $qty += $add_qty;
-	}
-	if ($qty > 0) {
-	    $return[$neo_id] = ceil($sum / $qty);
-	} else {
-	    $return[$neo_id] = NULL;
-	}
-    }
-
-    return $return;
-}
-
-/**
- * Returns an array of total spent and quantity, indexed by neo_id.
- * @staticvar array Cache of the data we're retrieving from the db
- * @param array $neo_ids An array of neo_ids => quantities to average
- * @return array arrays of sum and qty, indexed by neo_id
- */
-function get_batch_purchase_history_data($neo_ids) {
-    static $history_data = array();
-
-    $retrieve_ids = array();
-    $qty_max = 0;
-    foreach ($neo_ids as $neo_id => $qty) {
-	if (!array_key_exists($neo_id, $history_data)) {
-	    $retrieve_ids[] = $neo_id;
-	    if ($qty > $qty_max) {
-		$qty_max = $qty;
-	    }
-	}
-    }
-
-    //go to the db if we don't have all the data already
-    if (count($retrieve_ids) > 0) {
-	$db = db_connect();
-
-	$sql = "select neo_id, spent_np from purchases where neo_id IN (" . implode(', ', $retrieve_ids) . ") ORDER BY date DESC, time DESC";
-	//echo "$sql<br>";
-	$item_result = $db->query($sql);
-
-	//store data as neo_id => total spent, qty
-	$new_data = array();
-	while ($sub_row = $item_result->fetch_assoc()) {
-	    $new_data[$sub_row['neo_id']][] = $sub_row['spent_np'];
-	//    echo "Adding to id " . $sub_row['neo_id'] . " spent value " . $sub_row['spent_np'] . "<br>";
-	}
-
-	foreach ($new_data as $neo_id => $spent_np) {
-	    $qty_limit = $neo_ids[$neo_id]; //that's a quantity
-	    $sum = 0;
-	    $qty = 0;
-	    //sum up the first $qty_limit rows
-	    if (count($spent_np) > $qty_limit) {
-		$sum_me = array_slice($spent_np, 0, $qty_limit);
-		$sum = array_sum($sum_me);
-		$qty = $qty_limit;
-	    } else {
-		//just do the whole thing
-		$sum = array_sum($spent_np);
-		$qty = count($spent_np);
-	    }
-
-	    $history_data[$neo_id] = array(
-		'sum' => $sum,
-		'qty' => $qty
-	    );
-
-	    //echo print_r($history_data[$neo_id], true) . "<br>";
-
-	    if (($key = array_search($neo_id, $retrieve_ids)) !== false) {
-		unset($retrieve_ids[$key]);
-	    }
-	}
-
-	//We unset all the ones we retrieved. Anything left wasn't there.
-	foreach ($retrieve_ids as $neo_id) {
-	    $history_data[$neo_id] = false;
-	}
-    }
-
-    //NOW we return relevant data, which by now is all in the static $history_data array.
-    $return = array();
-    foreach ($neo_ids as $neo_id => $values) {
-	if (!array_key_exists($neo_id, $history_data)) {
-	    $return[$neo_id] = false;
-	} else {
-	    $return[$neo_id] = $history_data[$neo_id];
-	}
-    }
-
-    return $return;
-}
-
-function get_average_spent_on_stockpile_item($neo_id, $qty) {
-    $db = db_connect();
-
-    $sql = "select spent_np, date, time from purchases where neo_id = $neo_id ORDER BY date DESC, time DESC LIMIT $qty";
-    $item_result = $db->query($sql);
-
-    $spent = array();
-    while ($sub_row = $item_result->fetch_assoc()) {
-	$spent[] = $sub_row['spent_np'];
-    }
-
-    if (sizeof($spent) < $qty) {
-	//get legacy information and pad out $spent
-	$sql = "select average from legacy_spend where neo_id = $neo_id";
-	$legacy_result = $db->query($sql);
-	$average = 0;
-	while ($avg_row = $legacy_result->fetch_assoc()) {
-	    $average = $avg_row['average'];
-	}
-	$add_count = $qty - sizeof($spent);
-	for ($i = 0; $i < $add_count; ++$i) {
-	    $spent[] = $average;
-	}
-    }
-
-    if (sizeof($spent) > 0) {
-	return ceil(array_sum($spent) / count($spent));
-    } else {
-	return 0;
-    }
-}
-
-/**
- * Returns an array with some or all of the following keys:
- * - spent: Average spent on either shop qty, or stock + sdb quantity
- * - price: Sale price for my shop
- * - base: Only useful for quest shop "window" pricing.
- * - percent_rank: "window" pricing
- * @staticvar array $price_settings Local cache of price settings by my_type
- * @param array $item_row All the standard stuff we know about a stock item
- * @return array Should at least return a price key.
- */
-function get_pricing_info($item_row) {
-    static $price_settings = array();
-    if (!array_key_exists($item_row['my_type'], $price_settings)) {
-	$price_settings[$item_row['my_type']] = get_setting_group($item_row['my_type']);
-    }
-
-    //if it's an unload, do that and return early.
-    if ($item_row['unload']) {
-	$multiplier = $price_settings[$item_row['my_type']]['Unload Mult'];
-	$return['price'] = floor($item_row['sold_np'] * $multiplier);
-	return $return;
-    }
-
-    //now check $price_settings for how to calc the real price
-    if ($price_settings[$item_row['my_type']] !== false && array_key_exists('Shop Pricing', $price_settings[$item_row['my_type']])) {
-	//let's set some major types here.
-	switch ($price_settings[$item_row['my_type']]['Shop Pricing']) {
-	    case 'Windows':
-		//base is weird and totally arbitrary, but this is what I had in my sheets....
-		$return['base'] = ceil(($item_row['spent'] + ($item_row['sold_np'] * 3)) / 4);
-		$return['percent_rank'] = get_upper_percentile_rank($item_row['name'], $item_row['my_type']);
-
-		$low = $price_settings[$item_row['my_type']][$item_row['my_subtype'] . ' Low'];
-		$high = $price_settings[$item_row['my_type']][$item_row['my_subtype'] . ' High'];
-		$window_add = ($high - $low) * $return['percent_rank'] + $low;
-		//if we have anything in the SDB and the going price is ahead of where we want to be, 
-		//float more or less with the going price
-		if ($item_row['sdb_qty'] > 0 && $item_row['sold_np'] > ($item_row['spent'] + $window_add)) {
-		    $return['base'] = $item_row['sold_np'];
-		    $window_add = 100;
-		}
-		$return['price'] = ceil($return['base'] + $window_add);
-		if ($return['price'] < 1001) {
-		    $return['price'] = 1001;
-		}
-		break;
-	    case 'Linear':
-		$increace_percent = $price_settings[$item_row['my_type']]['Target Gain'];
-		$sale_mult = $price_settings[$item_row['my_type']]['Sale Mult'];
-		if ($item_row['sold_np'] > $item_row['spent'] * $increace_percent) {
-		    $return['price'] = floor($item_row['sold_np'] * $sale_mult);
-		} else {
-		    $return['price'] = ceil($item_row['spent'] * $increace_percent);
-		}
-		break;
-	}
-    }
-
-    return $return;
-}
-
-function cache_sale_price($item_row) {
-    if (!array_key_exists('prices', $_SESSION)) {
-	$_SESSION['prices'] = array();
-    }
-
-    if (!array_key_exists($item_row['neo_id'], $_SESSION['prices'])) {
-	$_SESSION['prices'][$item_row['neo_id']] = array(
-	    'price' => $item_row['price'],
-	    'ts' => time() //now, in seconds
-	);
-    } else {
-	//The key exists.
-	//If it's within whatever interval we care about, leave it alone. Otherwise, overwrite.
-	$hours = 3;
-	$seconds = $hours * 60 * 60;
-	$ts_floor = time() - $seconds;
-	if ($_SESSION['prices'][$item_row['neo_id']]['ts'] < $ts_floor) {
-	    $_SESSION['prices'][$item_row['neo_id']] = array(
-		'price' => $item_row['price'],
-		'ts' => time() //now, in seconds
-	    );
-	}
-    }
-}
-
-function get_cached_sale_price($item_row) {
-    if (!array_key_exists('prices', $_SESSION) || !array_key_exists($item_row['neo_id'], $_SESSION['prices'])) {
-	return null;
-    }
-
-    return $_SESSION['prices'][$item_row['neo_id']]['price'];
-}
+  }
 
 function get_url_page() {
     static $uri = NULL;
@@ -778,27 +449,4 @@ function sort_array_by_key($sort_me, $key, $pk, $direction = NULL) {
     array_multisort($sort1, $direction, $sort2, SORT_DESC, $sort_me);
 
     return $sort_me;
-}
-
-function add_ajax_sdb_empty_button($neo_id) {
-    $ret = "<img src='close.png' class='zero_img opacity_50' onClick=\"do_ajax('sdb_qty', [{'neo_id': '$neo_id', 'sdb_qty': '0'}], mark_complete($(this)))\", onMouseOver=\"$(this).removeClass('opacity_50')\", onMouseOut=\"$(this).addClass('opacity_50')\")\">";
-    return $ret;
-}
-
-function add_ajax_shop_stock_buttons($data) {
-    $neo_id = $data['neo_id'];
-    $ret = "<div class='right'><table class='structure'><tr><td>"
-	    . "<img src='up.png' class='arrow_img opacity_50' "
-	    . "onClick=\"do_ajax('shop_qty', [{'neo_id': '$neo_id', 'shop_qty': get_shop_qty($neo_id) + 1}], "
-	    . "update_shop_qty($neo_id, get_shop_qty($neo_id) + 1))\", "
-	    . "onMouseOver=\"$(this).removeClass('opacity_50')\", "
-	    . "onMouseOut=\"$(this).addClass('opacity_50')\")\">"
-	    . "</td></tr><tr><td>"
-	    . "<img src='down.png' class='arrow_img opacity_50' "
-	    . "onClick=\"do_ajax('shop_qty', [{'neo_id': '$neo_id', 'shop_qty': get_shop_qty($neo_id) - 1}], "
-	    . "update_shop_qty($neo_id, get_shop_qty($neo_id) - 1))\", "
-	    . "onMouseOver=\"$(this).removeClass('opacity_50')\", "
-	    . "onMouseOut=\"$(this).addClass('opacity_50')\")\">"
-	    . "</td></tr></table></div>";
-    return $ret;
-}
+  }

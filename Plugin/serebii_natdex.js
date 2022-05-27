@@ -37,8 +37,15 @@ $(document).ready(function () {
     }
     
     console.log(sendMe);
-
-    //do_ajax('jn_item', sendMe);
+    $('#dealie_message').html(sendMe.length + " monsters found");
+    if (sendMe.length > 0){
+      add_button_to_dealie("Upload monsters!", function (event) {
+	    console.log("I PUSHED THE BUTTON");
+            set_dealie_button_result("...");
+	    disable_dealie_button();
+	    do_ajax('natdex_index', sendMe)
+      });
+    }
 
 });
 
@@ -92,10 +99,13 @@ function kill_ads() {
 }
 
 function do_ajax_fail_stuff(action, message) {
-    console.log(message);
+  set_dealie_button_result("Graceful Failure!<br>" + message);
+  enable_dealie_button();
+  console.log(message);
 }
 
 function do_ajax_success_stuff(action, data) {
-    console.log(data.message);
+  set_dealie_button_result("Success!<br>" + data.message);
+  console.log(data.message);
 }
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2019 K4-713 <k4@hownottospellwinnebago.com>
+ * Copyright (C) 2022 K4-713 <k4@hownottospellwinnebago.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,5 +28,3 @@ $db_dbname = '';
 $data_auth_key = 'api_key';
 $site_access_key = 'site_key';
 
-//need this to determine if gourmet foods will be eatable by the pet or not
-$gourmet_pet_name = 'MyPetName';

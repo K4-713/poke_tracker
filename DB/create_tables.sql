@@ -52,7 +52,8 @@ CREATE TABLE mons (
   catchable_swsh BOOLEAN DEFAULT NULL,
   catchable_bdsp BOOLEAN DEFAULT NULL,
   catchable_hisui BOOLEAN DEFAULT NULL,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE poke_unique (name, variant)
 );
 
 -- CREATE TABLE inventory (

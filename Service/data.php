@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2019 K4-713 <k4@hownottospellwinnebago.com>
+ * Copyright (C) 2022 K4-713 <k4@hownottospellwinnebago.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,228 +104,15 @@ function handle_request($data) {
     }
 
     switch ($action) {
-	case 'trading_post':
-	case 'stock_transactions':
-	    $rowcount = db_query($action, 'insert', $data['rows']);
-	    if ($rowcount > 0) {
+	case 'natdex_index':
+      $rowcount = db_query($action, 'insert_update', $data['rows']);
+      if ($rowcount > 0) {
 		return_result('success', "$action: $rowcount rows updated");
 	    } else {
 		return_result('failure', "Problem writing to the database");
 	    }
 	    break;
-	case 'sales_history':
-	    $data['rows'] = add_restock_bit($data['rows']);
-	    $rowcount = db_query($action, 'insert', $data['rows']);
-	    if ($rowcount > 0) {
-		return_result('success', "$action: $rowcount rows updated");
-	    } else {
-		return_result('failure', "Problem writing to the database");
-	    }
-	    break;
-	case 'purchase':
-	    $stockpiling = get_setting_value('stockpiling');
-	    if ($stockpiling) {
-		$stockpiling = 1;
-	    } else {
-		$stockpiling = 0;
-	    }
-	    foreach ($data['rows'] as $index => $row) {
-		$data['rows'][$index]['stockpiling'] = $stockpiling;
-	    }
-	    $rowcount = db_query($action, 'insert', $data['rows']);
-	    if ($rowcount > 0) {
-		return_result('success', "$action: $rowcount rows updated");
-	    } else {
-		return_result('failure', "Problem writing to the database");
-	    }
-	    break;
-	case 'ssw_last':
-	    //add the missing item if it's missing.
-
-	    foreach ($data['rows'] as $ind => $row) {
-		$item_exists = ensure_item_exists($row['item_name'], $row['neo_id']);
-		if (!$item_exists) {
-		    return_result('failure', "$action: Couldn't update base item");
-		    break;
-		}
-	    }
-
-	    $rowcount = db_query('ssw_insert', 'insert', $data['rows']);
-	    if ($rowcount > 0) {
-		return_result('success', "$action: $rowcount rows updated");
-	    } else {
-		return_result('failure', "Problem writing to the database");
-	    }
-	    break;
-	case 'ssw_no_results':
-	    //we just have one single item, with only the name
-	    //get the neo_id if it exists. If not, create the item and use internal.
-	    $item = get_or_insert_item_by_name($data['rows'][0]['item_name']);
-	    if (!$item) {
-		return_result('failure', "Couldn't retrieve the relevant item");
-	    }
-
-	    if (!is_null($item['neo_id'])) {
-		$data['rows'][0]['neo_id'] = $item['neo_id'];
-		$rowcount = db_query('ssw_no_results', 'insert_with_neo_id', $data['rows']);
-	    } else {
-		$data['rows'][0]['my_id'] = $item['id'];
-		//error_log(print_r($data['rows'][0], true));
-		$rowcount = db_query('ssw_no_results', 'insert_without_neo_id', $data['rows']);
-	    }
-
-	    if ($rowcount > 0) {
-		return_result('success', "$rowcount zero searches added");
-	    }
-
-	    return_result('failure', "Couldn't add zero search");
-	    break;
-	case 'sdb_inventory':
-	    $item_rowcount = save_sdb_item_data($data['rows']);
-	    if ($item_rowcount == 0) {
-		return_result('failure', "Problem writing to the database");
-	    } else {
-		$qty_rowcount = save_sdb_qty($data['rows']);
-		if ($qty_rowcount > 0) {
-		    return_result('success', "Updated $item_rowcount items, and  $qty_rowcount quantities");
-		} else {
-		    return_result('failure', "Updated $item_rowcount items, but failed to update quantity data");
-		}
-	    }
-	    break;
-	case 'sdb_qty':
-	    $qty_rowcount = save_sdb_qty($data['rows']);
-	    if ($qty_rowcount > 0) {
-		return_result('success', "Updated $qty_rowcount quantities");
-	    } else {
-		return_result('failure', "Failed to update quantity data");
-	    }
-	    break;
-	case 'shop_qty':
-	    $qty_rowcount = save_shop_qty($data['rows']);
-	    if ($qty_rowcount > 0) {
-		return_result('success', "Updated $qty_rowcount quantities");
-	    } else {
-		return_result('failure', "Failed to update quantity data");
-	    }
-	    break;
-	case 'gc_list':
-	    //this one is going to be way tricky.We can't actually do the on duplicate key update,
-	    //because item name is most definitely not unique, and that's all we have. :/
-	    //I think we'll just have to do something relatively insane...
-	    //I wonder how many WHERE IN items we can cram into a single query without everything exploding.
-
-	    $result = update_gourmet_list_from_jn($data['rows']);
-	    if (!$result) {
-		error_log('I guess update gourmet list went wrong');
-	    } else {
-		return_result('success', $result);
-	    }
-
-	    break;
-	case 'jn_item':
-	    //Two things, now. First, update the rarity and release date.
-	    //If we have any rows in price_history, add any *new* ones to jn_prices
-
-	    $item_name = $data['rows'][0]['item_name'];
-	    $item = get_or_insert_item_by_name($item_name);
-	    $id = $item['id'];
-	    if ($id) {
-		$data['rows'][0]['id'] = $id;
-	    } else {
-		return_result('failure', "Problem retrieving item $item_name");
-	    }
-
-	    $updated_rr_string = 'not updated';
-	    $updated_jn_price_rows = 0;
-
-	    if (!is_null($data['rows'][0]['rarity'])) {
-		//update rarity and releae date. Just do it.
-		$result = db_query('jn_item', 'update_rarity_and_release_date', $data['rows']);
-		if ($result === false) {
-		    return_result('failure', "Failed to update '$item_name' rarity and/or release date");
-		} else {
-		    $updated_rr_string = 'updated';
-		}
-	    }
-	    if (!empty($data['rows'][0]['price_history'])) {
-		$insert_me = $data['rows'][0]['price_history'];
-		//trim out the lines that exist, and send the rest in.
-		$exists = db_raw_query("select * from jn_prices where item_name = '$item_name'");
-		if ($exists && !empty($exists)) {
-		    foreach ($exists as $i => $exists_values) {
-			foreach ($insert_me as $j => $insert_values) {
-			    if ($insert_values['price_date'] == $exists_values['date']) {
-				unset($insert_me[$j]);
-				break;
-			    }
-			}
-		    }
-		}
-
-		if (!empty($insert_me)) {
-		    //add the item name into every line. :/
-		    foreach ($insert_me as $i => $values) {
-			$insert_me[$i]['item_name'] = $item_name;
-		    }
-
-		    //do the batch query
-		    $result = db_query('jn_item', 'insert_jn_prices', $insert_me);
-		    if ($result === false) {
-			return_result('failure', "Failed updating $id price history");
-		    } else {
-			$updated_jn_price_rows = $result;
-		    }
-		}
-
-	    }
-	    return_result('failure', "Rarity/release $updated_rr_string, added $updated_jn_price_rows price rows");
-
-	    break;
-	case 'stock_market':
-	    //check to see if we've already saved somethin today, before you do the standard thing.
-	    $date = $data['rows'][0]['date'];
-	    if (check_later_stock_date($date)) {
-		$rowcount = db_query($action, 'insert', $data['rows']);
-		if ($rowcount > 0) {
-		    return_result('success', "$action: $rowcount rows updated");
-		} else {
-		    return_result('failure', "Problem writing to the database");
-		}
-	    } else {
-		return_result('success', "No update needed");
-	    }
-
-	    break;
-	case 'stock_get_1year_highs':
-	    $stocks = array();
-	    foreach ($data['rows'] as $ind => $values) {
-		$stocks[] = $values['stock'];
-	    }
-	    $max_stock_prices = get_max_stock_prices($stocks);
-	    if (is_array($max_stock_prices) && !empty($max_stock_prices)) {
-		return_result('success', "Max prices retrieved", $max_stock_prices);
-	    }
-	    return_result('failure', "Something went awry. No data.");
-	    break;
-	case 'restocked':
-	    $neo_id = $data['rows'][0]['neo_id'];
-	    $qty = $data['rows'][0]['qty'];
-	    if (remove_restock_bits_by_id($neo_id, $qty)) {
-		return_result('success', "Restock bits removed for neo_id '$neo_id'");
-	    } else {
-		return_result('failure', "Problem writing to the database");
-	    }
-	    break;
-	case 'restock_quick':
-	    //get a list of IDs limited by qty, remove bits from items in that list.
-	    if (remove_restock_bits_by_name_qty($data['rows'])) {
-		return_result('success', "Restock bits removed for restock batch");
-	    } else {
-		return_result('failure', "Problem writing to the database");
-	    }
-	    break;
-	default:
+    default:
 	    return_result('failure', "Invalid action '$action'");
     }
 }
@@ -351,323 +138,25 @@ function get_expected_data($action) {
 function get_data_model_info($action) {
     $model_info = array();
 
-    /** sales_history * */
-    $model_info['sales_history'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'item_name' => 'varchar_64',
-	    'purchased_by' => 'varchar_32',
-	    'sold_np' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO sales '
-	    . '(date, item_name, purchased_by, sold_np, restock) '
-	    . 'VALUES (?,?,?,?,?)',
-	    'binding' => 'sssii', //later, we can do this programmatically based on the types in 'data'
-	    'data' => array(
-		'date' => 'date',
-		'item_name' => 'varchar_64',
-		'purchased_by' => 'varchar_32',
-		'sold_np' => 'int',
-		'restock' => 'bool'
-	    )
-	)
-    );
+    /** natdex_index * */
+  $model_info['natdex_index']['data'] = array(
+      'name' => 'varchar_32',
+      'type1' => 'varchar_16',
+      'type2' => 'varchar_16|null',
+      'ability_1' => 'varchar_16',
+      'ability_2' => 'varchar_16|null',
+      'ability_hidden' => 'varchar_16|null',
+      'b_att' => 'int',
+      'b_def' => 'int',
+      'b_hp' => 'int',
+      'b_sp_att' => 'int',
+      'b_sp_def' => 'int',
+      'b_speed' => 'int',
+      'dex_national' => 'int'
+  );
+  $model_info['natdex_index']['insert_update'] = query_build($model_info['natdex_index']['data'], 'insert_update', 'mons');
 
-    /** purchase * */
-    $model_info['purchase'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'time' => 'time',
-	    'neo_id' => 'int',
-	    'sold_by' => 'varchar_32',
-	    'spent_np' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO purchases '
-	    . '(date, time, neo_id, sold_by, spent_np, stockpiling) '
-	    . 'VALUES (?,?,?,?,?,?)',
-	    'binding' => 'ssisii',
-	    'data' => array(
-		'date' => 'date',
-		'time' => 'time',
-		'neo_id' => 'int',
-		'sold_by' => 'varchar_32',
-		'spent_np' => 'int',
-		'stockpiling' => 'bool'
-	    ),
-	)
-    );
-
-    /** ssw_last * */
-    $model_info['ssw_last'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'time' => 'time',
-	    'item_name' => 'varchar_64',
-	    'neo_id' => 'int',
-	    'sold_by' => 'varchar_32',
-	    'sold_np' => 'int',
-	    'ssw_total' => 'int'
-	)
-    );
-
-    $model_info['ssw_insert'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'time' => 'time',
-	    'neo_id' => 'int',
-	    'sold_by' => 'varchar_32',
-	    'sold_np' => 'int',
-	    'ssw_total' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO ssw_next '
-	    . '(date, time, neo_id, sold_by, sold_np, ssw_total) '
-	    . 'VALUES (?,?,?,?,?,?)',
-	    'binding' => 'ssisii'
-	)
-    );
-
-    /** sdb_inventory * */
-    $model_info['sdb_inventory'] = array(
-	'data' => array(
-	    'name' => 'varchar_64',
-	    'neo_type' => 'varchar_32',
-	    'sdb_qty' => 'int',
-	    'neo_id' => 'int'
-	),
-    );
-
-    /** sdb_qty * */
-    $model_info['sdb_qty'] = array(
-	'data' => array(
-	    'sdb_qty' => 'int',
-	    'neo_id' => 'int'
-	),
-    );
-
-    /** shop_qty * */
-    $model_info['shop_qty'] = array(
-	'data' => array(
-	    'shop_qty' => 'int',
-	    'neo_id' => 'int'
-	),
-    );
-
-    /** trading_post * */
-    $model_info['trading_post'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'time' => 'time',
-	    'item_name' => 'varchar_64',
-	    'tp_trades' => 'int',
-	    'tp_items_found' => 'int',
-	    'tp_price' => 'int|null'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO trading_post '
-	    . '(date, time, item_name, tp_trades, tp_items_found, tp_price) '
-	    . 'VALUES (?,?,?,?,?,?)',
-	    'binding' => 'sssiii'
-	)
-    );
-
-    /** Stock Market * */
-    $model_info['stock_market'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'stock' => 'varchar_8',
-	    'price' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO stock_prices '
-	    . '(date, stock, price) '
-	    . 'VALUES (?,?,?)',
-	    'binding' => 'ssi'
-	),
-    );
-
-    $model_info['stock_transactions'] = array(
-	'data' => array(
-	    'date' => 'date',
-	    'stock' => 'varchar_8',
-	    'price_point' => 'int',
-	    'volume' => 'int',
-	    'total_np' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO stock_transactions '
-	    . '(date, stock, price_point, volume, total_np) '
-	    . 'VALUES (?,?,?,?,?)',
-	    'binding' => 'ssiii'
-	),
-    );
-
-    $model_info['stock_get_1year_highs'] = array(
-	'data' => array(
-	    'stock' => 'varchar_8'
-	)
-    );
-
-    $model_info['gc_list'] = array(
-	'data' => array(
-	    'name' => 'varchar_64',
-	    'rarity' => 'int'
-	)
-    );
-
-    $model_info['jn_item'] = array(
-	'data' => array(
-	    'item_name' => 'varchar_64',
-	    'rarity' => 'int|null',
-	    'release_date' => 'date|null',
-	    'price_history' => array(
-		'price' => 'int',
-		'price_date' => 'date'
-	    )
-	),
-	'update_rarity_and_release_date' => array(
-	    'query' => 'UPDATE items SET rarity = ?, release_date = ? where id = ?',
-	    'binding' => 'isi',
-	    'data' => array(
-		'rarity' => 'int',
-		'release_date' => 'date',
-		'id' => 'int'
-	    )
-	),
-	'insert_jn_prices' => array(
-	    'query' => 'INSERT INTO jn_prices (item_name, date, jn_price) VALUES (?,?,?)',
-	    'binding' => 'ssi',
-	    'data' => array(
-		'item_name' => 'varchar_64',
-		'price_date' => 'date',
-		'price' => 'int'
-	    )
-	)
-    );
-
-    $model_info['update_item_rarity_by_name'] = array(
-	'data' => array(
-	    'rarity' => 'int',
-	    'name' => 'varchar_64'
-	),
-	'update' => array(
-	    'query' => 'UPDATE items SET rarity = ? WHERE name = ?',
-	    'binding' => 'is'
-	)
-    );
-
-    $model_info['update_item_name_neo_id'] = array(
-	'name_by_neo_id' => array(
-	    'query' => 'UPDATE items SET name = ? WHERE neo_id = ?',
-	    'data' => array(
-		'name' => 'varchar_64',
-		'neo_id' => 'int'),
-	    'binding' => 'si'
-	),
-	'neo_id_by_name' => array(
-	    'query' => 'UPDATE items SET neo_id = ? WHERE name = ?',
-	    'data' => array(
-		'neo_id' => 'int',
-		'name' => 'varchar_64'
-	    ),
-	    'binding' => 'is'
-	)
-    );
-
-    $model_info['insert_item_name_and_rarity'] = array(
-	'data' => array(
-	    'name' => 'varchar_64',
-	    'rarity' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO items '
-	    . '(name, rarity)'
-	    . 'VALUES (?,?)',
-	    'binding' => 'si'
-	)
-    );
-
-    $model_info['insert_item_name_and_neo_id'] = array(
-	'data' => array(
-	    'name' => 'varchar_64',
-	    'neo_id' => 'int'
-	),
-	'insert' => array(
-	    'query' => 'INSERT INTO items '
-	    . '(name, neo_id)'
-	    . 'VALUES (?,?)',
-	    'binding' => 'si'
-	)
-    );
-
-    $model_info['insert_gc_item'] = array(
-	'data' => array(
-	    'my_id' => 'int'
-	),
-	'insert_update' => array(
-	    'query' => 'INSERT INTO gourmet_club '
-	    . '(my_id)'
-	    . 'VALUES (?) '
-	    . 'ON DUPLICATE KEY UPDATE '
-	    . 'my_id = ?',
-	    'binding' => 'ii'
-	)
-    );
-
-    $model_info['ssw_no_results'] = array(
-	'data' => array(
-	    'item_name' => 'varchar_64',
-	    'date' => 'date',
-	    'time' => 'time'
-	),
-	'insert_with_neo_id' => array(
-	    'query' => 'INSERT INTO ssw_next '
-	    . '(date, time, neo_id, ssw_total) '
-	    . 'VALUES (?,?,?,0)',
-	    'binding' => 'ssi',
-	    'data' => array(
-		'date' => 'date',
-		'time' => 'time',
-		'neo_id' => 'int'
-	    )
-	),
-	'insert_without_neo_id' => array(
-	    'query' => 'INSERT INTO ssw_next '
-	    . '(date, time, my_id, ssw_total) '
-	    . 'VALUES (?,?,?,0)',
-	    'binding' => 'ssi',
-	    'data' => array(
-		'date' => 'date',
-		'time' => 'time',
-		'my_id' => 'int'
-	    )
-	)
-    );
-
-    $model_info['restocked'] = array(
-	'data' => array(
-	    'neo_id' => 'int',
-	    'qty' => 'int'
-	),
-	'update' => array(//getting an error here - this version of mySQL doesn't support limit in subqueries. Blast.
-	    'query' => 'UPDATE sales SET restock=0 WHERE id IN '
-	    . '(select id from sales '
-	    . 'left join items i on sales.item_name = i.name '
-	    . 'where i.neo_id = ? and sales.restock=1 LIMIT ?)',
-	    'binding' => 'ii'
-	)
-    );
-
-    $model_info['restock_quick'] = array(
-	'data' => array(
-	    'item_name' => 'varchar_64',
-	    'qty' => 'int'
-	)
-    );
-
-    //and finally return
+  //and finally return
     if (array_key_exists($action, $model_info)) {
 	return $model_info[$action];
     }
@@ -744,6 +233,74 @@ function db_query($action, $query_type, $data) {
     $res = $db->query("COMMIT");
 
     return $rowcount;
+  }
+
+  function query_build($structure, $query_type, $table) {
+  $query = array();
+  switch ($query_type) {
+    case 'insert_update' :
+      $query['query'] = "INSERT INTO $table ";
+      $query['query'] .= query_build_insert_fields($structure) . " ";
+      $query['query'] .= "VALUES " . query_qmarks($structure) . " ";
+      $query['query'] .= "ON DUPLICATE KEY UPDATE ";
+      $query['query'] .= query_build_odku_values($structure);
+      $query['binding'] = query_get_binding_string($structure) . query_get_binding_string($structure);
+      break;
+    default :
+      return_result('failure', "Invalid query type '$query_type'");
+  }
+  return $query;
+}
+
+function query_build_insert_fields($structure) {
+  $fields = implode(', ', array_keys($structure));
+  return "($fields)";
+}
+
+function query_qmarks($structure) {
+  //this is so dum
+  $qmarks = '';
+  for ($i = 0; $i < sizeof($structure); ++$i) {
+    if ($qmarks === '') {
+      $qmarks = '?';
+    } else {
+      $qmarks .= ', ?';
+    }
+  }
+  return "($qmarks)";
+}
+
+function query_build_odku_values($structure) {
+  //more dum
+  $odku = '';
+  foreach ($structure as $field => $type) {
+    if ($odku === '') {
+      $odku = "$field = ?";
+    } else {
+      $odku = ", $field = ?";
+    }
+  }
+  return $odku;
+}
+
+function query_get_binding_string($structure) {
+  $binding = '';
+  foreach ($structure as $field => $type) {
+    $mod_type = explode('_', $type);
+    $mod_type = explode('|', $mod_type[0]);
+    $mod_type = $mod_type[0];
+    switch ($mod_type) {
+      case 'int':
+      case 'bool':
+        $binding .= 'i';
+      case 'varchar':
+        $binding .= 's';
+        break;
+      default:
+        return_result('failure', "Unhandled var type '$type' for field '$field' ($mod_type)");
+        break;
+    }
+  }
 }
 
 function save_sdb_item_data($data) {
