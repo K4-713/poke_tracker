@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2020 K4-713 <k4@hownottospellwinnebago.com>
+Copyright (C) 2022 K4-713 <k4@hownottospellwinnebago.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -13,10 +13,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/* 
-    Created on : Jan 16, 2020, 11:44:36 AM
-    Author     : K4-713 <k4@hownottospellwinnebago.com>
 */
 
 .small { font-size: 12px; font-family:arial;}
@@ -50,6 +46,40 @@ h1, h2 { font-family:Lato, sans-serif; margin-bottom:5px; }
 .left { float:left; clear:none }
 .right { float:right; clear:none }
 .nudge_down { margin-top: 4px; }
+div.types { text-align:center;}
+div.poke_type { 
+  font-size: 8px; 
+  font-family:ubuntu; 
+  color:#ffffff; 
+  border:1px solid #000000; 
+  font-weight:bold; 
+  border: 1px solid #777;
+  width: 36;
+  font-weight: bold;
+  padding: 0 4 0 4;
+  margin: 3 1 4 1;
+  text-align: center;
+  display: inline-block;
+}
+
+div.fire { background-color:#ff5500; }
+div.grass { background-color:#0f812b; }
+div.poison { background-color:#9b00ff; }
+div.flying { background-color:#81cae2; }
+div.water { background-color:#3987ff; }
+div.bug { background-color:#a5d600; }
+div.normal { background-color:#777777; }
+div.electric { background-color:#e7c400; }
+div.ground { background-color:#8a5810; }
+div.fairy { background-color:#f691eb; }
+div.fighting { background-color:#c70000; }
+div.psychic { background-color:#e07c99; }
+div.rock { background-color:#9a8358; }
+div.steel { background-color:#617d99; }
+div.ice { background-color:#96ebec; }
+div.ghost { background-color:#5e00c2; }
+div.dragon { background-color:#0030b9; }
+div.dark { background-color:#000000; }
 
 svg.graph { background-color:#f5f5f5; margin:30px; padding:20px }
 path { stroke:#000000; fill:none }

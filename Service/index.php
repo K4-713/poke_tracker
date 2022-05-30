@@ -34,10 +34,8 @@ $table_structure = array(
     'dex_national' => '#',
     'name' => 'Name',
     'variant' => 'Variant',
-    'type1' => 'Type 1',
-    'type2' => 'Type 2',
-    'ability1' => "Ability 1",
-    'ability2' => "Ability 2",
+    'type' => 'Type',
+    'abilities' => "Abilities",
     'ability_hidden' => "Hidden Ability",
     'legendary' => "Legend",
     'mythical' => "Myth",
@@ -58,12 +56,28 @@ $table_structure = array(
 while ($row = $result->fetch_assoc()) {
   $add_row = array();
   foreach ($table_structure as $key => $value) {
-    if (!is_null($value)) {
-      if (array_key_exists($key, $row)) {
-        $add_row[$key] = $row[$key];
-      } else {
-        $add_row[$key] = NULL;
-      }
+    switch ($key) {
+      case "type":
+        $add_row[$key] = get_poketype_output($row['type1']);
+        if (!is_null($row['type2'])){
+          $add_row[$key] .= get_poketype_output($row['type2']);
+        }
+        $add_row[$key] = "<div class='types'>" . $add_row[$key] . "</div>";
+        break;
+      case "abilities":
+        $add_row[$key] = $row['ability1'];
+        if (!is_null($row['ability2'])){
+          $add_row[$key] .= "<br>" . $row['ability2'];
+        }
+        break;
+      default:
+        if (!is_null($value)) {
+          if (array_key_exists($key, $row)) {
+            $add_row[$key] = $row[$key];
+          } else {
+            $add_row[$key] = NULL;
+          }
+        }
     }
   }
   $report[] = $add_row;
@@ -72,10 +86,9 @@ while ($row = $result->fetch_assoc()) {
 echo "<table class='small'>";
 echo "<tr>";
 foreach ($table_structure as $key => $label) {
-    echo "<td>$label</td>";
+  echo "<td>$label</td>";
 }
 echo "</tr>\n";
-
 
 foreach ($report as $date => $data) {
   echo "<tr>";

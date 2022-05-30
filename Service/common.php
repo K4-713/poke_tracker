@@ -384,8 +384,8 @@ function set_setting_value($setting, $value) {
 function get_url_page() {
     static $uri = NULL;
     if (is_null($uri)) {
-	$uri = explode('?', $_SERVER['REQUEST_URI']);
-	$uri = $uri[0];
+      $uri = explode('?', $_SERVER['REQUEST_URI']);
+      $uri = $uri[0];
     }
     return $uri;
 }
@@ -424,7 +424,7 @@ function make_link($add_params) {
 
 function sort_array_by_key($sort_me, $key, $pk, $direction = NULL) {
 
-    switch ($direction) {
+  switch ($direction) {
 	case NULL:
 	    $sort_asc = array('my_type', 'my_subtype', 'name', 'neo_id');
 	    if (in_array($key, $sort_asc)) {
@@ -450,3 +450,7 @@ function sort_array_by_key($sort_me, $key, $pk, $direction = NULL) {
 
     return $sort_me;
   }
+
+function get_poketype_output($type) {
+  return "<div class='poke_type " . strtolower($type) ."'>" . strtoupper($type) . "</div>";
+}
