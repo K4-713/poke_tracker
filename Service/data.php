@@ -95,35 +95,54 @@ function return_result($status, $message, $data = null) {
 
 function handle_request($data) {
 
-    $action = $data['action'];
+  $action = $data['action'];
 
-    //always validate data
-    if (!validate_data($action, $data['rows'])) {
-	return_result('failure', "Invalid data");
-	return false;
-    }
+  //always validate data
+  if (!validate_data($action, $data['rows'])) {
+    return_result('failure', "Invalid data");
+    return false;
+  }
 
-    switch ($action) {
-	case 'natdex_index':
-            $rowcount = db_multi_query($action, 'insert_update', $data['rows']);
-            if ($rowcount > 0) {
-		return_result('success', "$action: $rowcount rows updated");
-	    } else {
-		return_result('failure', "Problem writing to the database");
-	    }
-	    break;
+  switch ($action) {
+    case 'natdex_index':
+      $rowcount = db_multi_query($action, 'insert_update', $data['rows']);
+      if ($rowcount > 0) {
+        return_result('success', "$action: $rowcount rows updated");
+      } else {
+        return_result('failure', "Problem writing to the database");
+      }
+      break;
+    case 'tag_legends':
+      $rowcount = 0;
+      $legends = array();
+      $myths = array();
+      foreach ($data['rows'] as $key => $value){
+        if (array_key_exists('mythical', $value) && !is_null($value['mythical'])){
+          $myths[] = $value;
+        } else {
+          $legends[] = $value;
+        }
+      }
+      $rowcount = db_query($action, 'tag_legends', $legends );
+      $rowcount += db_query($action, 'tag_myths', $myths );
+      if ($rowcount > 0) {
+        return_result('success', "$action: $rowcount rows updated");
+      } else {
+        return_result('failure', "Problem writing to the database");
+      }
+      break;
     default:
-	    return_result('failure', "Invalid action '$action'");
-    }
+      return_result('failure', "Invalid action '$action'");
+  }
 }
 
 //temp until I can get all of them moved over.
 function validate_data($action, $data) {
-    $expected_data = get_expected_data($action);
-    if ($expected_data) {
-	return validate($data, $expected_data);
-    }
-    return false;
+  $expected_data = get_expected_data($action);
+  if ($expected_data) {
+    return validate($data, $expected_data);
+  }
+  return false;
 }
 
 function get_expected_data($action) {
@@ -136,16 +155,16 @@ function get_expected_data($action) {
 
 //Tryna refactor a few things at a time with this
 function get_data_model_info($action) {
-    $model_info = array();
+  $model_info = array();
 
-    /** natdex_index * */
+  /** natdex_index **/
   $model_info['natdex_index']['data'] = array(
       'name' => 'varchar_32',
       'type1' => 'varchar_16',
       'type2' => 'varchar_16|null',
       'ability1' => 'varchar_16',
-        'ability2' => 'varchar_16|null',
-        'ability_hidden' => 'varchar_16|null',
+      'ability2' => 'varchar_16|null',
+      'ability_hidden' => 'varchar_16|null',
       'b_att' => 'int',
       'b_def' => 'int',
       'b_hp' => 'int',
@@ -155,90 +174,112 @@ function get_data_model_info($action) {
       'dex_national' => 'int'
   );
   $model_info['natdex_index']['insert_update'] = query_build($model_info['natdex_index']['data'], 'insert_update', 'mons');
-    error_log(__FUNCTION__ . ' QUERY="' . $model_info['natdex_index']['insert_update']['query'] . '"');
 
-    //and finally return
-    if (array_key_exists($action, $model_info)) {
-	return $model_info[$action];
-    }
-    error_log(__FUNCTION__ . ": No $action key defined");
-    return false;
+  
+  /** tag_legends **/
+  $model_info['tag_legends']['data'] = array(
+      'legendary' => 'bool|null',
+      'mythical' => 'bool|null',
+      'name' => 'varchar_32'
+  );
+  $model_info['tag_legends']['tag_legends'] = array(
+      'query' => "UPDATE mons SET legendary = ? WHERE name = ?",
+      'binding' => "is",
+	    'data' => array(
+        'legendary' => 'bool',
+        'name' => 'varchar_32'
+      )
+  );
+  $model_info['tag_legends']['tag_myths'] = array(
+      'query' => "UPDATE mons SET mythical = ? WHERE name = ?",
+      'binding' => "is",
+	    'data' => array(
+        'mythical' => 'bool',
+        'name' => 'varchar_32'
+      )
+  );
+  //and finally return
+  if (array_key_exists($action, $model_info)) {
+    return $model_info[$action];
+  }
+  error_log(__FUNCTION__ . ": No $action key defined");
+  return false;
 }
 
 //Okay, this is now for everything.
 function db_query($action, $query_type, $data) {
-    $model_info = get_data_model_info($action);
-    if (!$model_info) {
-	return false;
-    }
-
-    $db = db_connect();
-    $query = $model_info[$query_type]['query'];
-    $stmt = $db->prepare($query);
-    if (!$stmt) {
-	error_log(__FUNCTION__ . ": $action, $query_type query unpreparable.");
-	error_log($query);
-	return false;
-    }
-
-    //moving some stuff around, here...
-    //still haven't really decided how I want to store queries and whatever.
-    $data_structure = false;
-    if (array_key_exists('data', $model_info[$query_type])) {
-	$data_structure = $model_info[$query_type]['data'];
-    } else {
-	$data_structure = $model_info['data'];
-    }
-
-    //Try this, kids at home!
-    extract($data_structure);
-    $params = array(
-	$model_info[$query_type]['binding']
-    );
-
-    //oh god
-    foreach ($data_structure as $key => $whatever) {
-	//pass the variable variable by reference. Obviously.
-	$params[] = &$$key;
-    }
-
-    //This is probably confusing, and could totally be clenaer
-    //For insert/update queries, we have to send the variable references twice
-    if ($query_type === 'insert_update') {
-	foreach ($data_structure as $key => $whatever) {
-	    $params[] = &$$key;
-	}
-    }
-
-    //allegedly, you can call methods of instantiated objects with call_user_func_array like this...
-    $call_me = array(
-	$stmt,
-	'bind_param'
-    );
-
-    error_log("Binding? '" . $params[0] . "'");
-
-    //for the record, I definitely hate myself by now.
-    call_user_func_array($call_me, $params);
-
-    $db->query("START TRANSACTION");
-    $rowcount = 0;
-    foreach ($data as $row => $line) {
-	//oh look, more.
-	foreach ($data_structure as $key => $whatever) {
-	    $$key = $line[$key];
-	}
-	if ($stmt->execute()) {
-	    ++$rowcount;
-	}
-    }
-    $stmt->close();
-    $res = $db->query("COMMIT");
-
-    return $rowcount;
+  $model_info = get_data_model_info($action);
+  if (!$model_info) {
+    return false;
   }
 
-  function db_multi_query($action, $query_type, $data, $chunk_size = 20) {
+  $db = db_connect();
+  $query = $model_info[$query_type]['query'];
+  $stmt = $db->prepare($query);
+  if (!$stmt) {
+    error_log(__FUNCTION__ . ": $action, $query_type query unpreparable.");
+    error_log($query);
+    return false;
+  }
+
+  //moving some stuff around, here...
+  //still haven't really decided how I want to store queries and whatever.
+  $data_structure = false;
+  if (array_key_exists('data', $model_info[$query_type])) {
+    $data_structure = $model_info[$query_type]['data'];
+  } else {
+    $data_structure = $model_info['data'];
+  }
+
+  //Try this, kids at home!
+  extract($data_structure);
+  $params = array(
+      $model_info[$query_type]['binding']
+  );
+
+  //oh god
+  foreach ($data_structure as $key => $whatever) {
+    //pass the variable variable by reference. Obviously.
+    $params[] = &$$key;
+  }
+
+  //This is probably confusing, and could totally be clenaer
+  //For insert/update queries, we have to send the variable references twice
+  if ($query_type === 'insert_update') {
+    foreach ($data_structure as $key => $whatever) {
+      $params[] = &$$key;
+    }
+  }
+
+  //allegedly, you can call methods of instantiated objects with call_user_func_array like this...
+  $call_me = array(
+      $stmt,
+      'bind_param'
+  );
+
+  error_log("Binding? '" . $params[0] . "'");
+
+  //for the record, I definitely hate myself by now.
+  call_user_func_array($call_me, $params);
+
+  $db->query("START TRANSACTION");
+  $rowcount = 0;
+  foreach ($data as $row => $line) {
+    //oh look, more.
+    foreach ($data_structure as $key => $whatever) {
+      $$key = $line[$key];
+    }
+    if ($stmt->execute()) {
+      ++$rowcount;
+    }
+  }
+  $stmt->close();
+  $res = $db->query("COMMIT");
+
+  return $rowcount;
+}
+
+function db_multi_query($action, $query_type, $data, $chunk_size = 20) {
     $chunks = array_chunk($data, $chunk_size);
     $rowcount = 0;
     foreach ($chunks as $ehh => $chunk) {

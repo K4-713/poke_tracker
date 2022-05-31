@@ -36,7 +36,6 @@ function db_connect() {
 }
 
 function validate($data, $expected_structure) {
-
     foreach ($data as $row => $columns) {
 	//check to see that everything we expect is here, in every row
         foreach ($expected_structure as $field => $type) {
@@ -174,6 +173,14 @@ function check_int($value) {
     }
     //error_log("Not an integer? '$value");
     return false;
+}
+
+
+function check_bool($value) {
+  if ($value === true || $value === false) {
+    return true;
+  }
+  return false;
 }
 
 //I guess if I'm going to go cheap, this is kinda okay

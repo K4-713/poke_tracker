@@ -18,6 +18,10 @@
 	{
 	    "matches": ["*://*.serebii.net/pokemon/nationalpokedex.shtml"],
 	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_natdex.js"]
+	},
+	{
+	    "matches": ["*://*.serebii.net/pokemon/legendary.shtml"],
+	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_legends.js"]
 	}
     ],
     "host_permissions": [
