@@ -37,8 +37,6 @@ $table_structure = array(
     'type' => 'Type',
     'abilities' => "Abilities",
     'ability_hidden' => "Hidden Ability",
-    'legendary' => "Legend",
-    'mythical' => "Myth",
     'blank_1' => NULL,
     'b_hp' => "HP",
     'b_att' => "Attack",
@@ -68,6 +66,15 @@ while ($row = $result->fetch_assoc()) {
         $add_row[$key] = $row['ability1'];
         if (!is_null($row['ability2'])){
           $add_row[$key] .= "<br>" . $row['ability2'];
+        }
+        break;
+      case "name":
+        $add_row[$key] = $row[$key];
+        if ($row['legendary'] === '1') {
+          $add_row[$key] .= "<img class='inline' src='./Images/Icons/Legend.gif'>";
+        }
+        if ($row['mythical'] === '1') {
+          $add_row[$key] .= "<img class='inline' src='./Images/Icons/Myth.gif'>";
         }
         break;
       default:
