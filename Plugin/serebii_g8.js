@@ -22,56 +22,81 @@ $(document).ready(function () {
     add_dealie_to_page("This is a dealie.");
 
     kill_ads();
+    
+    //grab the monster's name. Try second "dextable" -> second tr, first immediate td 
+    var monster_name = $("table.dextable").eq(1).find("tr").eq(1).children("td").eq(0).text().trim();
+    console.log(monster_name);
 
     //But first, we need the item name...
     var item_name = $('div.content-wrapper h1').text();
-    //console.log(item_name);
-
-    var rarity = null;
-    var release_date = null;
-
-    var extra_info = $('div.content-wrapper h1 + div div ul.small-block-grid-2 li');
-    if (extra_info.length > 0) {
-	extra_info.each(function (i) {
-	    var kids = $(this).children();
-	    var heading = $(kids).eq(0).text().trim();
-	    switch (heading) {
-		case 'Rarity':
-		    rarity = get_rarity($(kids).eq(1).text().trim());
-		    break;
-		case 'Release Date':
-		    //coming in like 'January 30, 2002'
-		    release_date = convert_jn_date_to_sql($(kids).eq(1).text().trim());
-		    break;
-	    }
-	});
+    console.log(item_name);
+    
+    //check for images
+    //The images we want to save apparently have alt text of "Normal Sprite" and "Shiny Sprite".Baller.
+    //These are.png.
+    var images = [];
+    var maybe_image = $("img[alt='Normal Sprite']");
+    if (maybe_image.length > 0){
+      images['n'] = "https://www.serebii.net" + maybe_image.attr('src');
     }
+    
+    maybe_image = $("img[alt='Shiny Sprite']");
+    if (maybe_image.length > 0){
+      images['s'] = "https://www.serebii.net" + maybe_image.attr('src');
+    }
+    
+    console.log(images);
+    
+    //now send some messages to the backgorund listener...
+    chrome.runtime.sendMessage({ file: images['n'], name: "scrapey/" + monster_name + ".png" }, function(response) {
+      console.log(response.message);
+    });
+
+//    var rarity = null;
+//    var release_date = null;
+
+//    var extra_info = $('div.content-wrapper h1 + div div ul.small-block-grid-2 li');
+//    if (extra_info.length > 0) {
+//	extra_info.each(function (i) {
+//	    var kids = $(this).children();
+//	    var heading = $(kids).eq(0).text().trim();
+//	    switch (heading) {
+//		case 'Rarity':
+//		    rarity = get_rarity($(kids).eq(1).text().trim());
+//		    break;
+//		case 'Release Date':
+//		    //coming in like 'January 30, 2002'
+//		    release_date = convert_jn_date_to_sql($(kids).eq(1).text().trim());
+//		    break;
+//	    }
+//	});
+//    }
     //console.log('Rarity = ' + rarity);
     //console.log('Release Date = ' + release_date);
 
-    var price_history = [];
-    var price_history_rows = $('div.price-row');
-    if (price_history_rows.length > 0) {
-	price_history_rows.each(function (i) {
-	    var price_date = get_date_from_mush($(this));
-	    var price = get_price_from_mush($(this).text().trim());
-	    if (price && price_date) {
-		var temp = {
-		    'price': price,
-		    'price_date': price_date
-		};
-		price_history.push(temp);
-	    }
-	});
-    }
+//    var price_history = [];
+//    var price_history_rows = $('div.price-row');
+//    if (price_history_rows.length > 0) {
+//	price_history_rows.each(function (i) {
+//	    var price_date = get_date_from_mush($(this));
+//	    var price = get_price_from_mush($(this).text().trim());
+//	    if (price && price_date) {
+//		var temp = {
+//		    'price': price,
+//		    'price_date': price_date
+//		};
+//		price_history.push(temp);
+//	    }
+//	});
+//    }
 
-    var sendMe = [];
-    var main_data = {
-	'item_name': item_name,
-	'rarity': rarity,
-	'release_date': release_date,
-	'price_history': price_history
-    }
+//    var sendMe = [];
+//    var main_data = {
+//	'item_name': item_name,
+//	'rarity': rarity,
+//	'release_date': release_date,
+//	'price_history': price_history
+//    }
 
     //Annoying. Oh well.
     //sendMe.push(main_data);

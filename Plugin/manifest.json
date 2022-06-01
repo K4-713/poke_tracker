@@ -9,12 +9,11 @@
 	"48": "icons/crazy.svg",
 	"96": "icons/crazy.svg"
     },
+    "background": {
+        "service_worker": "background.js"
+    },
 
     "content_scripts": [
-	{
-	    "matches": ["*://*.serebii.net/pokedex-xy/*"],
-	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_g6.js"]
-	},
 	{
 	    "matches": ["*://*.serebii.net/pokemon/nationalpokedex.shtml"],
 	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_natdex.js"]
@@ -22,6 +21,10 @@
 	{
 	    "matches": ["*://*.serebii.net/pokemon/legendary.shtml"],
 	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_legends.js"]
+	},
+	{
+	    "matches": ["*://*.serebii.net/pokedex-swsh/*"],
+	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_g8.js"]
 	}
     ],
     "host_permissions": [
@@ -31,7 +34,8 @@
     ],
     "permissions": [
         "webRequest",
-        "declarativeNetRequest"
+        "declarativeNetRequest",
+        "downloads"
     ],
     
     "declarative_net_request": {
