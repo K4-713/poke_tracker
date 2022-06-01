@@ -1,31 +1,16 @@
-#Neologger#
-Chrome Extension For Logging Excessive Information From Neopets.com
+#Poke Tracker#
+Chrome Extension For Scraping Monster Data
 
 ##Current Capabilities##
-###Logging###
-* Sales History
-    * date, item name, buyer, price
-* Item Purchases
-    * date, time, neopets item id, seller, price
-* SSW Lowest Price, After Any Purchases
-    * date, time, neopets item id, seller, price
-* Safety Deposit Box Inventory
-    * item name, neopets item id, official type, sdb quantity
-
-###Shop Stock Tracking##
-* Pretty rudimentary, but you can indicate how many of what items you want to keep in stock
+###Scrapey Scrape###
+* National Dex on Serebii
+* Legendary / Mythical flags from Serebii
 
 ###Reporting###
-lol.Give me a minute..
+Natdex index, and a bunch of cruft. .
 
 ###TODO:###
-Track more things on Neopets
-* Stock Market - purchases, sales, stock prices over time
-* Shop Stock Tracking - should do something with sales history vs purchases for items with a shop stock listed
-
-Harvest other data from Jellyneo
-* Item rarity
-* Price History
-* Wearable?
-
-Graphs and Reports and Whatever
+Next: Scrape individual g8 monster pages. Like this: https://www.serebii.net/pokedex-swsh/dratini/
+Also, images
+https://developer.chrome.com/docs/extensions/reference/downloads/
+https://stackoverflow.com/questions/22676270/how-to-call-save-image-as-feature-in-chrome-extension
