@@ -25,35 +25,56 @@ $(document).ready(function () {
     
     //grab the monster's name. Try second "dextable" -> second tr, first immediate td 
     var monster_name = $("table.dextable").eq(1).find("tr").eq(1).children("td").eq(0).text().trim();
-    console.log(monster_name);
-
-    //But first, we need the item name...
-    var item_name = $('div.content-wrapper h1').text();
-    console.log(item_name);
     
     //check for images
     //The images we want to save apparently have alt text of "Normal Sprite" and "Shiny Sprite".Baller.
     //These are.png.
     var images = [];
-    var maybe_image = $("img[alt='Normal Sprite']");
-    if (maybe_image.length > 0){
-      images['n'] = "https://www.serebii.net" + maybe_image.attr('src');
-    }
-    
-    maybe_image = $("img[alt='Shiny Sprite']");
-    if (maybe_image.length > 0){
-      images['s'] = "https://www.serebii.net" + maybe_image.attr('src');
-    }
-    
+    add_image_info(images, monster_name);
     console.log(images);
     
+    //add a hook to the sprite clickies
+    var sprite_switchers = $('a.sprite-select');
+    if (sprite_switchers.length > 0) {
+      sprite_switchers.each(function (i) {
+        $(this).click(function () {
+          add_image_info(images, monster_name);
+          console.log(images);
+        });
+      });
+    }
+    
+//    input_obj.click(function () {
+//      $(this).select();
+//    });
+    
     //now send some messages to the backgorund listener...
-    chrome.runtime.sendMessage({ file: images['n'], name: "scrapey/" + monster_name + ".png" }, function(response) {
-      console.log(response.message);
-    });
+    //tested and working! Beef me up here please.
+//    chrome.runtime.sendMessage({ file: images['n'], name: "scrapey/" + monster_name + ".png" }, function(response) {
+//      console.log(response.message);
+//    });
+    
+    //NEW PLAN: Show what we're about to save in the dealie. Add buttons to actually do the thing(s)
+    
+    
+    //what else can we get form this page?
+    //dex numbers for galar (+expansions), sinnoh and hisui
+    //gender ratios
+    //types and VARIANTS... uuugh
+    //dynamax capable
+    //...maybe we'll want to track held items later. LATER I SAID. Per-game.
+    //egg groups OR STERILITY
+    //evolutionary line and requirements
+    //per-game locations
+    
+    //I guess first I should figure out if I've got a variant here or not, 
+    //and then worry about which one they're giving me by default.
+    var variants = get_variants();
+    console.log("Variants:");
+    console.log(variants);
+    
+    //now, what do we have to do differently if we have multiple variants?
 
-//    var rarity = null;
-//    var release_date = null;
 
 //    var extra_info = $('div.content-wrapper h1 + div div ul.small-block-grid-2 li');
 //    if (extra_info.length > 0) {
@@ -71,8 +92,7 @@ $(document).ready(function () {
 //	    }
 //	});
 //    }
-    //console.log('Rarity = ' + rarity);
-    //console.log('Release Date = ' + release_date);
+//
 
 //    var price_history = [];
 //    var price_history_rows = $('div.price-row');
@@ -106,6 +126,51 @@ $(document).ready(function () {
 
 });
 
+function add_image_info(images, monster_name){
+    var maybe_image = $("img#sprite-regular");
+    if (maybe_image.length > 0){
+      images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
+    }
+    
+    maybe_image = $("img#sprite-shiny");
+    if (maybe_image.length > 0){
+      images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
+    }
+    
+  return images;
+}
+
+function get_img_final_name(maybe_image, poke_name){
+  var img_src = fix_img_src(maybe_image.attr('src'));
+  //g8 image format:
+  //Normal image: /swordshield/pokemon/263-g.png
+  //Shiny: /Shiny/SWSH/263-g.png
+  // :(
+  
+  var link_array = img_src.split('/');
+  var shiny = false;
+  if (link_array[1] === "Shiny"){
+    shiny = true;
+  }
+  
+  var orig_filename = link_array[(link_array.length-1)].split('.')[0]; //yeah, right
+  var of_array = orig_filename.split('-');
+  var variant = '';
+  if (of_array.length > 1){
+    variant = of_array[1];
+  }
+  
+  var final_name = poke_name;
+  if (variant !== ''){
+    final_name += '_' + char_to_regional_variant(variant);
+  }
+  if (shiny){
+    final_name += '_Shiny';
+  }
+  final_name += ".png";  //wfm
+  return final_name;
+}
+
 function kill_ads() {
   var banner = $('div#content div');
   var underbanner = $('div#nn_sticky');
@@ -122,21 +187,6 @@ function do_ajax_success_stuff(action, data) {
     console.log(data.message);
 }
 
-function get_price_from_mush(mush) {
-    var mush_array = mush.split("(");
-    var text = mush_array[0];
-    if (text.includes('Price unable to be determined')) {
-	return false;
-    }
-    if (text.includes(' on ')) {
-	var text_array = text.split(' on ');
-	text = text_array[0];
-    }
-
-    var price_string = convert_neo_price_to_number(text.trim());
-    return price_string;
-}
-
 function get_date_from_mush(mush) {
     var probably_date = mush.children().eq(2).text().trim();
     if (probably_date.includes("by ")) {
@@ -147,4 +197,27 @@ function get_date_from_mush(mush) {
 	return get_date(text_array[0]);
     }
     return get_date(probably_date);
+}
+
+//this should return an array with at least one variant.
+//let's not make Kanto default, I don't even like that.
+function get_variants(){
+  var ret = [];
+    //probably the best place to look for this will be the typing box.
+    //so same line as the name... and the only "cen" class td. Cool.
+    var types = $("table.dextable").eq(1).find("tr").eq(1).children("td.cen").eq(0);
+    //now, what does this look like if there's a variant?
+    //first child is a table. Rad.
+    var variants = types.children("table");
+    if(variants.length > 0){
+      console.log("Found some variants!");
+      var rows = variants.find("tr");
+      rows.each(function (i) {
+        ret.push($(this).children('td').eq(0).text().trim());
+      });
+    } else {
+      console.log("No variants. Whew");
+      ret.push('Normal');
+    }
+    return ret;
 }

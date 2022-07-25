@@ -11,11 +11,6 @@ Natdex index, and a bunch of cruft. .
 
 ###TODO:###
 Next: Scrape individual g8 monster pages. Like this: https://www.serebii.net/pokedex-swsh/dratini/
-Also, images
-https://developer.chrome.com/docs/extensions/reference/downloads/
-https://stackoverflow.com/questions/22676270/how-to-call-save-image-as-feature-in-chrome-extension
-^^ looks like maybe old news about the background listener?
-
-Unfortunately it is, but for the wrong reasons. Background pages don't exist anymore.
-Do this instead:
-https://developer.chrome.com/docs/extensions/mv3/migrating_to_service_workers/
+Also images, which we can totally do now!
+How do we want to name these images? Maybe natdex_number+monster_name+[optional variant]+[s for shiny].png.
+At some point, I will probably have to handle images that aren't .png files, but whatever.

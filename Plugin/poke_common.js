@@ -112,6 +112,46 @@ function capitalize(word){
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
+function char_to_regional_variant(char){
+  switch(char){
+    case 'a' :
+      return "Alolan";
+      break;
+    case 'g' :
+      return "Galarian";
+      break;
+    case 'h' :
+      return "Hisuian";
+      break;
+    case 'n' :
+      return "Normal";  //do I like this?
+      break;
+    default:
+      return char + "-Undefined";
+      break;
+  }
+}
+
+function fix_img_src(src){
+  var no_protocol = src.split("//");
+  var nps = "";
+  if (no_protocol.length === 1){
+    nps = src;
+  } else {
+    nps = no_protocol[1];
+  }
+  
+  var src_array = nps.split('/');
+  if (src_array.length === 1){
+    return src_array;
+  }
+  for (var i=0; i<src_array.length; ++i){
+    if (src_array[i] === 'www.serebii.net'){
+      src_array[i] = '';
+    }
+  }
+  return src_array.join('/');
+}
 
 /**
  * Ajax doer
