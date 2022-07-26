@@ -14,3 +14,8 @@ Next: Scrape individual g8 monster pages. Like this: https://www.serebii.net/pok
 Also images, which we can totally do now!
 How do we want to name these images? Maybe natdex_number+monster_name+[optional variant]+[s for shiny].png.
 At some point, I will probably have to handle images that aren't .png files, but whatever.
+
+Next for Real: Dealie Manipulation.
+Add button for downloading images
+Add button for sending everything scraped to the server
+Preview data pre-flight, only upload on button press.

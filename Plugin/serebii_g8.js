@@ -19,7 +19,8 @@
 $(document).ready(function () {
     document.body.style.border = "2px solid yellow";
     console.log("THIS IS YOUR EXTENSION. Helloooo.");
-    add_dealie_to_page("This is a dealie.");
+    add_dealie_to_page("This is a dealie.", 2);
+    unset_dealie_css('height');
 
     kill_ads();
     
@@ -43,10 +44,6 @@ $(document).ready(function () {
         });
       });
     }
-    
-//    input_obj.click(function () {
-//      $(this).select();
-//    });
     
     //now send some messages to the backgorund listener...
     //tested and working! Beef me up here please.
@@ -127,16 +124,23 @@ $(document).ready(function () {
 });
 
 function add_image_info(images, monster_name){
-    var maybe_image = $("img#sprite-regular");
-    if (maybe_image.length > 0){
-      images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
-    }
-    
-    maybe_image = $("img#sprite-shiny");
-    if (maybe_image.length > 0){
-      images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
-    }
-    
+  var maybe_image = $("img#sprite-regular");
+  if (maybe_image.length > 0){
+    images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
+  }
+
+  maybe_image = $("img#sprite-shiny");
+  if (maybe_image.length > 0){
+    images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
+  }
+
+  var message = "<ul style='padding-left:6px;text-align:left'>";
+  for (var i in images) {
+    message += "<li><a style='color:#998800' href='" + images[i] + "' target=_new>" + i + "</a></li>";
+  }
+  message += "</ul>";
+  set_dealie_message("Images Found:<br>" + message, 2);
+
   return images;
 }
 

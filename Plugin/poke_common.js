@@ -202,100 +202,104 @@ function do_ajax(action, rows, extras) {
  */
 
 
-function add_dealie_to_page(message) {
+function add_dealie_to_page(message, panes = 1) {
     var dealie = document.createElement('div');
     dealie.id = "interface_dealie";
 
-    var dealie_message = document.createElement('div');
-    dealie_message.id = "dealie_message";
-    dealie.appendChild(dealie_message);
+    for (var i=1; i <= panes; ++i){
+      var dealie_message = document.createElement('div');
+      dealie_message.id = "dealie_message_" + i;
+      dealie.appendChild(dealie_message);
 
-    var input_div = document.createElement('div');
-    input_div.id = "dealie_input_div";
-    dealie.appendChild(input_div);
+      var input_div = document.createElement('div');
+      input_div.id = "dealie_input_div_" + i;
+      dealie.appendChild(input_div);
 
-    var button_div = document.createElement('div');
-    button_div.id = "dealie_button_div";
-    dealie.appendChild(button_div);
+      var button_div = document.createElement('div');
+      button_div.id = "dealie_button_div_" + i;
+      dealie.appendChild(button_div);
+    }
 
     $('body').append(dealie);
-    apply_dealie_css();
-
-    $('#dealie_message').html(message);
+    apply_dealie_css(panes);
+    set_dealie_message(message);
 
 }
 
-function add_button_to_dealie(button_text, button_callback) {
+function set_dealie_message(message, pane = 1){
+    $('#dealie_message_' + pane).html(message);
+}
+
+function add_button_to_dealie(button_text, button_callback, pane = 1) {
     var dealie_button = document.createElement('BUTTON');
     dealie_button.innerHTML = button_text;
-    dealie_button.id = 'dealie_button';
+    dealie_button.id = 'dealie_button_' + pane;
     dealie_button.onclick = button_callback;
 
-    $('#dealie_button_div').append(dealie_button);
+    $('#dealie_button_div_' + pane).append(dealie_button);
 
     var interface_button_result = document.createElement('div');
-    interface_button_result.id = 'interface_button_result';
-    $('#dealie_button_div').append(interface_button_result);
+    interface_button_result.id = 'interface_button_result_' + pane;
+    $('#dealie_button_div_' + pane).append(interface_button_result);
 }
 
-function add_input_to_dealie(input_label) {
+function add_input_to_dealie(input_label, pane = 1) {
     var dealie_input = document.createElement('input');
-    dealie_input.id = "interface_user_input";
+    dealie_input.id = "interface_user_input_" + pane;
 
     var table = document.createElement("table");
-    table.id = 'dealie_input_table';
-    $('#dealie_input_div').append(table);
+    table.id = 'dealie_input_table_' + pane;
+    $('#dealie_input_div_' + pane).append(table);
 
-    $('#dealie_input_table').append(document.createElement('tr'));
+    $('#dealie_input_table_' + pane).append(document.createElement('tr'));
 
     var dealie_input_label = document.createElement('td');
-    dealie_input_label.id = 'dealie_input_label';
+    dealie_input_label.id = 'dealie_input_label_' + pane;
 
-    $('#dealie_input_table tr').append(dealie_input_label);
-    $('#dealie_input_table tr').append(document.createElement('td'));
-    $('#dealie_input_div tr td + td').append(dealie_input);
+    $('#dealie_input_table_' + pane + ' tr').append(dealie_input_label);
+    $('#dealie_input_table_' + pane + ' tr').append(document.createElement('td'));
+    $('#dealie_input_div_' + pane + ' tr td + td').append(dealie_input);
 
-    $('#dealie_input_table').css('padding-top', '10px')
+    $('#dealie_input_table_' + pane).css('padding-top', '10px')
 	    .css('padding-bottom', '10px');
-    $('#dealie_input_label').css('text-align', 'right')
+    $('#dealie_input_label_' + pane).css('text-align', 'right')
 	    .css('width', '120px');
-    $('#interface_user_input').css('width', '60px');
-    $('#dealie_button_div').css('padding-top', '0px');
+    $('#interface_user_input_' + pane).css('width', '60px');
+    $('#dealie_button_div_' + pane).css('padding-top', '0px');
     $('#interface_dealie').css('height', '125px')
 
-    $('#dealie_input_label').html(input_label);
+    $('#dealie_input_label_' + pane).html(input_label);
 }
 
-function get_dealie_input_value() {
-    return $('#interface_user_input').val();
+function get_dealie_input_value(pane = 1) {
+    return $('#interface_user_input_' + pane).val();
 }
 
-function disable_dealie_input() {
-    $('#interface_user_input').attr("disabled", true);
+function disable_dealie_input(pane = 1) {
+    $('#interface_user_input_' + pane).attr("disabled", true);
 }
 
-function enable_dealie_input() {
-    $('#interface_user_input').attr("disabled", false);
+function enable_dealie_input(pane = 1) {
+    $('#interface_user_input_' + pane).attr("disabled", false);
 }
 
-function remove_dealie_input() {
-
-    $('#dealie_input_table').remove();
+function remove_dealie_input(pane = 1) {
+    $('#dealie_input_table_' + pane).remove();
 }
 
-function disable_dealie_button() {
-    $('#dealie_button').attr("disabled", true);
+function disable_dealie_button(pane = 1) {
+    $('#dealie_button_' + pane).attr("disabled", true);
 }
 
-function enable_dealie_button() {
-    $('#dealie_button').attr("disabled", false);
+function enable_dealie_button(pane = 1) {
+    $('#dealie_button_' + pane).attr("disabled", false);
 }
 
-function remove_dealie_button() {
-    $('#dealie_button').remove();
+function remove_dealie_button(pane = 1) {
+    $('#dealie_button_' + pane).remove();
 }
 
-function apply_dealie_css() {
+function apply_dealie_css(panes) {
     $('#interface_dealie').css('position', 'fixed')
 	    .css('top', '10px')
 	    .css('right', '8px')
@@ -309,18 +313,23 @@ function apply_dealie_css() {
 	    .css('color', '#000000')
 	    .css('font-family', 'Verdana, Arial, Helvetica')
 	    .css('font-size', '12px');
+    for (var i=1; i <= panes; ++i){
+      $('#dealie_message_' + i).css('text-align', 'center')
+              .css('font-weight', 'bold')
+              .css('padding', '10px 15px 0px 15px');
 
-    $('#dealie_message').css('text-align', 'center')
-	    .css('font-weight', 'bold')
-	    .css('padding', '10px 15px 0px 15px');
-
-    $('#dealie_button_div').css('text-align', 'center')
-	    .css('font-weight', 'bold')
-	    .css('padding', '20px 15px 0px 15px');
+      $('#dealie_button_div_' + i).css('text-align', 'center')
+              .css('font-weight', 'bold')
+              .css('padding', '20px 15px 0px 15px');
+    }
 }
 
-function set_dealie_button_result(message) {
-    $('#interface_button_result').html(message);
+function unset_dealie_css(attr) {
+  $('#interface_dealie').css(attr, '');
+}
+
+function set_dealie_button_result(message, pane) {
+    $('#interface_button_result_' + pane).html(message);
 }
 
 function highlight_all_onclick(input_obj) {
