@@ -74,6 +74,9 @@ $(document).ready(function () {
     console.log("Dex Numbers:");
     console.log(dex_numbers);
     
+    var gender_ratios = get_gender_ratios();
+    console.log("Gender Ratios");
+    console.log(gender_ratios);
     
     
     
@@ -253,6 +256,29 @@ function get_dex_numbers(){
       });
     } else {
       console.error("Problem: No dex numbers!");
+    }
+    return ret;
+}
+
+//Get gender ratios
+function get_gender_ratios(){
+  var ret = [];
+    //Second Dex table, Second row, column 4
+    var main_cell = $("table.dextable").eq(1).find("tr").eq(1).children().eq(3);
+    
+    //first child is a table. Still rad.
+    var genders = main_cell.children("table");
+    if(genders.length > 0){
+      var rows = genders.find("tr");
+      rows.each(function (i) {
+        var gender = $(this).children('td').eq(0).text().trim();
+        gender = gender.split(" ")[0];
+        var percent = $(this).children('td').eq(1).text().trim();
+        percent = percent.replace('%', '');
+        ret[gender] = parseFloat(percent);
+      });
+    } else {
+      console.error("Problem: No genders!");
     }
     return ret;
 }
