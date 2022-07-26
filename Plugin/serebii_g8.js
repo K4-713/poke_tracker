@@ -70,8 +70,14 @@ $(document).ready(function () {
     console.log("Variants:");
     console.log(variants);
     
-    //now, what do we have to do differently if we have multiple variants?
-
+    var dex_numbers = get_dex_numbers();
+    console.log("Dex Numbers:");
+    console.log(dex_numbers);
+    
+    
+    
+    
+    //what else do we have to do differently if we have multiple variants?
 
 //    var extra_info = $('div.content-wrapper h1 + div div ul.small-block-grid-2 li');
 //    if (extra_info.length > 0) {
@@ -222,6 +228,31 @@ function get_variants(){
     } else {
       console.log("No variants. Whew");
       ret.push('Normal');
+    }
+    return ret;
+}
+
+//Get all the different dex numbers, stuff them in an array
+function get_dex_numbers(){
+  var ret = [];
+    //Second Dex table, Second row, column 3
+    var main_cell = $("table.dextable").eq(1).find("tr").eq(1).children().eq(2);
+    
+    //first child is a table. Rad.
+    var numbers = main_cell.children("table");
+    if(numbers.length > 0){
+      var rows = numbers.find("tr");
+      rows.each(function (i) {
+        var dex_name = $(this).children('td').eq(0).text().trim();
+        var dex_number = $(this).children('td').eq(1).text().trim();
+        dex_number = dex_number.replace('#', '');
+        if (dex_number === "---"){
+          return;
+        }
+        ret[dex_name] = parseInt(dex_number);
+      });
+    } else {
+      console.error("Problem: No dex numbers!");
     }
     return ret;
 }
