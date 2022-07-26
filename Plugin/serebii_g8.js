@@ -15,11 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//global
+var images = [];
 
 $(document).ready(function () {
     document.body.style.border = "2px solid yellow";
     console.log("THIS IS YOUR EXTENSION. Helloooo.");
     add_dealie_to_page("This is a dealie.", 2);
+    add_button_to_dealie("Download Images", download_images, pane = 2);
     unset_dealie_css('height');
 
     kill_ads();
@@ -30,37 +33,28 @@ $(document).ready(function () {
     //check for images
     //The images we want to save apparently have alt text of "Normal Sprite" and "Shiny Sprite".Baller.
     //These are.png.
-    var images = [];
-    add_image_info(images, monster_name);
-    console.log(images);
+    images = add_image_info(images, monster_name);
     
     //add a hook to the sprite clickies
     var sprite_switchers = $('a.sprite-select');
-    if (sprite_switchers.length > 0) {
+    if (sprite_switchers.length > 0) { //sometimes they don't exist.
       sprite_switchers.each(function (i) {
         $(this).click(function () {
-          add_image_info(images, monster_name);
-          console.log(images);
+          images = add_image_info(images, monster_name);
         });
       });
     }
     
-    //now send some messages to the backgorund listener...
-    //tested and working! Beef me up here please.
-//    chrome.runtime.sendMessage({ file: images['n'], name: "scrapey/" + monster_name + ".png" }, function(response) {
-//      console.log(response.message);
-//    });
-    
     //NEW PLAN: Show what we're about to save in the dealie. Add buttons to actually do the thing(s)
     
     
-    //what else can we get form this page?
-    //types and VARIANTS... uuugh
-    //dynamax capable
+    //what else can we get frmm this page?
+    //dynamaxer?
+    //mega?
     //...maybe we'll want to track held items later. LATER I SAID. Per-game.
-    //egg groups OR STERILITY
+    //egg groups - none means sterile!
     //evolutionary line and requirements
-    //per-game locations
+    //per-game locations (later, I think. Maybe.)
     
     var variants = get_variants();
     console.log("Variants:");
@@ -119,6 +113,16 @@ function add_image_info(images, monster_name){
   set_dealie_message("Images Found:<br>" + message, 2);
 
   return images;
+}
+
+//this will only work if images is indeed global
+function download_images(){
+  //Have the button send image download messages to the backgorund listener...
+  for (var i in images) {
+    chrome.runtime.sendMessage({ file: images[i], name: "scrapey/" + i }, function(response) {
+      console.log(response.message);
+    });
+  }
 }
 
 function get_img_final_name(maybe_image, poke_name){

@@ -243,6 +243,11 @@ function add_button_to_dealie(button_text, button_callback, pane = 1) {
     $('#dealie_button_div_' + pane).append(interface_button_result);
 }
 
+function rebind_dealie_button(callback, pane = 1){
+  $('#dealie_button_' + pane).attr('onclick', '').unbind('click');
+  $('#dealie_button_' + pane).attr('onclick', callback);
+}
+
 function add_input_to_dealie(input_label, pane = 1) {
     var dealie_input = document.createElement('input');
     dealie_input.id = "interface_user_input_" + pane;
@@ -316,11 +321,11 @@ function apply_dealie_css(panes) {
     for (var i=1; i <= panes; ++i){
       $('#dealie_message_' + i).css('text-align', 'center')
               .css('font-weight', 'bold')
-              .css('padding', '10px 15px 0px 15px');
+              .css('padding', '10px 15px 10px 15px');
 
       $('#dealie_button_div_' + i).css('text-align', 'center')
               .css('font-weight', 'bold')
-              .css('padding', '20px 15px 0px 15px');
+              .css('padding', '20px 15px 10px 15px');
     }
 }
 
