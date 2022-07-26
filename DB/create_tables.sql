@@ -19,7 +19,8 @@ CREATE TABLE mons (
   id int(11) NOT NULL AUTO_INCREMENT,
   name varchar(32) DEFAULT NULL,
   dex_national int(11) DEFAULT NULL,
-  variant varchar(16) DEFAULT NULL,
+  region varchar(16) DEFAULT NULL,
+  form varchar(16) DEFAULT NULL,
   type1 varchar(16) DEFAULT NULL,
   type2 varchar(16) DEFAULT NULL,
   ability1 varchar(32) DEFAULT NULL,
@@ -53,7 +54,7 @@ CREATE TABLE mons (
   catchable_bdsp BOOLEAN DEFAULT NULL,
   catchable_hisui BOOLEAN DEFAULT NULL,
   PRIMARY KEY (id),
-  UNIQUE poke_unique (name, variant)
+  UNIQUE poke_unique (name, region, form)
 );
 
 -- CREATE TABLE inventory (

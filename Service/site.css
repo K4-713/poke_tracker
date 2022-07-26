@@ -81,7 +81,7 @@ div.ghost { background-color:#5e00c2; }
 div.dragon { background-color:#0030b9; }
 div.dark { background-color:#000000; }
 
-img.inline { width: 18px; height: 16px; padding-left: 10px; float: right; padding-right: 0px;}
+img.inline { height: 14px; padding-left: 3px; float: right; padding-right: 0px;}
 
 svg.graph { background-color:#f5f5f5; margin:30px; padding:20px }
 path { stroke:#000000; fill:none }

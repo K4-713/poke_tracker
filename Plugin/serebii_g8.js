@@ -55,8 +55,6 @@ $(document).ready(function () {
     
     
     //what else can we get form this page?
-    //dex numbers for galar (+expansions), sinnoh and hisui
-    //gender ratios
     //types and VARIANTS... uuugh
     //dynamax capable
     //...maybe we'll want to track held items later. LATER I SAID. Per-game.
@@ -64,8 +62,6 @@ $(document).ready(function () {
     //evolutionary line and requirements
     //per-game locations
     
-    //I guess first I should figure out if I've got a variant here or not, 
-    //and then worry about which one they're giving me by default.
     var variants = get_variants();
     console.log("Variants:");
     console.log(variants);
@@ -78,43 +74,15 @@ $(document).ready(function () {
     console.log("Gender Ratios");
     console.log(gender_ratios);
     
-    
-    
     //what else do we have to do differently if we have multiple variants?
+    
+    //each variant should get its own built-out line to submit.
+    //types
+    //stats
+    //abilities (fff)
+    //evolution chain (double fff - okay, wait, this is okay: Images are named predictably!)
+    //moves, but that's for later. Way, way later.
 
-//    var extra_info = $('div.content-wrapper h1 + div div ul.small-block-grid-2 li');
-//    if (extra_info.length > 0) {
-//	extra_info.each(function (i) {
-//	    var kids = $(this).children();
-//	    var heading = $(kids).eq(0).text().trim();
-//	    switch (heading) {
-//		case 'Rarity':
-//		    rarity = get_rarity($(kids).eq(1).text().trim());
-//		    break;
-//		case 'Release Date':
-//		    //coming in like 'January 30, 2002'
-//		    release_date = convert_jn_date_to_sql($(kids).eq(1).text().trim());
-//		    break;
-//	    }
-//	});
-//    }
-//
-
-//    var price_history = [];
-//    var price_history_rows = $('div.price-row');
-//    if (price_history_rows.length > 0) {
-//	price_history_rows.each(function (i) {
-//	    var price_date = get_date_from_mush($(this));
-//	    var price = get_price_from_mush($(this).text().trim());
-//	    if (price && price_date) {
-//		var temp = {
-//		    'price': price,
-//		    'price_date': price_date
-//		};
-//		price_history.push(temp);
-//	    }
-//	});
-//    }
 
 //    var sendMe = [];
 //    var main_data = {

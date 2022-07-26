@@ -23,7 +23,7 @@ start_page($title);
 
 $db = db_connect();
 
-$sql = "SELECT * from mons ORDER BY dex_national ASC, variant DESC";
+$sql = "SELECT * from mons ORDER BY dex_national ASC, region DESC";
 $result = $db->query($sql);
 
 echo ($result->num_rows . " monsters retrieved <br>");
@@ -33,7 +33,8 @@ $report = array();
 $table_structure = array(
     'dex_national' => '#',
     'name' => 'Name',
-    'variant' => 'Variant',
+    'region' => 'Region',
+    'form' => 'Form',
     'type' => 'Type',
     'abilities' => "Abilities",
     'ability_hidden' => "Hidden Ability",
