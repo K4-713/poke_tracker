@@ -55,6 +55,7 @@ $(document).ready(function () {
     //egg groups - none means sterile!
     //evolutionary line and requirements
     //per-game locations (later, I think. Maybe.)
+    var lines =[];
     
     var variants = get_variants();
     console.log("Variants:");
@@ -67,6 +68,25 @@ $(document).ready(function () {
     var gender_ratios = get_gender_ratios();
     console.log("Gender Ratios");
     console.log(gender_ratios);
+    
+    for (var i in variants) {
+      //later: Differentiate between regions and forms. argh.
+      lines[variants[i]] = {
+        name : monster_name,
+        dex_national : dex_numbers['National'],
+        region : (variants[i] !== 'Normal' ? variants[i] : null),
+        female : gender_ratios['Female'],
+        male : gender_ratios['Male'],
+        dex_galar: (dex_numbers['Galar'] || null),
+        dex_galar_isle: (dex_numbers['Isle of Armor'] || null),
+        dex_galar_crown: (dex_numbers['Crown Tundra'] || null),
+        dex_sinnoh_bdsp: (dex_numbers['Sinnoh'] || null),
+        dex_hisui: (dex_numbers['Hisui'] || null),
+      };
+    }
+    
+    console.log("FINAL:");
+    console.log(lines);
     
     //what else do we have to do differently if we have multiple variants?
     
@@ -218,7 +238,7 @@ function get_dex_numbers(){
     if(numbers.length > 0){
       var rows = numbers.find("tr");
       rows.each(function (i) {
-        var dex_name = $(this).children('td').eq(0).text().trim();
+        var dex_name = $(this).children('td').eq(0).text().trim().replace(':', '');
         var dex_number = $(this).children('td').eq(1).text().trim();
         dex_number = dex_number.replace('#', '');
         if (dex_number === "---"){
