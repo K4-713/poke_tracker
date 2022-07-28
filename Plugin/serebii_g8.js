@@ -18,6 +18,7 @@
 //global
 var images = [];
 var normal_form = "Normal"; //not always.
+var monster_name = ""; //gah
 
 $(document).ready(function () {
     document.body.style.border = "2px solid yellow";
@@ -29,7 +30,7 @@ $(document).ready(function () {
     kill_ads();
     
     //grab the monster's name. Try second "dextable" -> second tr, first immediate td 
-    var monster_name = $("table.dextable").eq(1).find("tr").eq(1).children("td").eq(0).text().trim();
+    monster_name = $("table.dextable").eq(1).find("tr").eq(1).children("td").eq(0).text().trim();
     
     //check for images
     //The images we want to save apparently have alt text of "Normal Sprite" and "Shiny Sprite".Baller.
@@ -47,9 +48,6 @@ $(document).ready(function () {
     }
     
     //what else can we get from this page?
-    //stats per form(e)
-    //egg groups - none means sterile!
-    //  Just one big csv string is fine, but we only get 32 chars for now.
     //catchability in different g8 games
     
     //LATER - needs new tables and/or a schema change.
@@ -98,6 +96,16 @@ $(document).ready(function () {
       abilities = temp_abilities;
     }
     
+    //for some daffy reason, stats.length here is always zero... wat?
+    if (Object.keys(stats).length === 1 && variants.length > 1){
+      console.log("Tryin to expand stats here...");
+      var temp_stats = [];
+      for(var i=0; i<variants.length; ++i){
+        temp_stats[variants[i]] = stats[normal_form];
+      };
+      stats = temp_stats;
+    }    
+    
     for (var i in variants) { //all the sames first
       //differentiating regions and forms is stupid.
       var variant = (variants[i] !== 'Normal' ? variants[i] : null);
@@ -120,6 +128,7 @@ $(document).ready(function () {
         b_speed : (stats[variants[i]].b_speed || null),
         female : gender_ratios['Female'],
         male : gender_ratios['Male'],
+        egg_groups : get_egg_group_string(),
         dex_galar: (dex_numbers['Galar'] || null),
         dex_galar_isle: (dex_numbers['Isle of Armor'] || null),
         dex_galar_crown: (dex_numbers['Crown Tundra'] || null),
@@ -256,26 +265,32 @@ function get_date_from_mush(mush) {
 function get_variants(){
   //shoot, I'm looking in the wrong place. REMIX
   var ret = [];
-    //Variants are in the 7th dextable, in a farther table, in bold.
-    var variants = $("table.dextable").eq(6).find("table").eq(0).find("b");
-    //now, what does this look like if there's a variant?
-    if(variants.length > 0){
-      console.log("Found some variants!");
-      variants.each(function (i) {
-        ret.push(translate_form($(this).text().trim()));
-      });
-    } else {
-      console.log("No variant types. Whew");
-      ret.push('Normal');
-    }
-    
-    //if there's no "Normal" in there, change the global synonym.
-    if (!ret.includes("Normal")) {
-      //again, this is basically a global.
-      normal_form = ret[0];
-    }
-    
-    return ret;
+  //Variants are in the 7th or maybe 8th dextable, in a farther table, in bold.
+  
+  var variant_table = $("table.dextable").eq(6);
+  if ($(variant_table).find("td").eq(0).text().trim() === "Gender Differences"){
+    variant_table = $("table.dextable").eq(7);
+  }
+
+  var variants = $(variant_table).find("table").eq(0).find("b");
+  //now, what does this look like if there's a variant?
+  if(variants.length > 0){
+    console.log("Found some variants!");
+    variants.each(function (i) {
+      ret.push(translate_form($(this).text().trim()));
+    });
+  } else {
+    console.log("No variant types. Whew");
+    ret.push('Normal');
+  }
+
+  //if there's no "Normal" in there, change the global synonym.
+  if (!ret.includes("Normal")) {
+    //again, this is basically a global.
+    normal_form = ret[0];
+  }
+
+  return ret;
 }
 
 function translate_form(raw_form){
@@ -283,6 +298,8 @@ function translate_form(raw_form){
   raw_form = raw_form.replace(" Forme", "");
   raw_form = raw_form.replace(" Form", "");
   switch (raw_form){
+    case "Kantonian" :
+    case "Johtonian" :
     case "Hoennian" :
       return "Normal";
       break;
@@ -428,13 +445,13 @@ function get_stats(){
     if (checkme.is("table") && checkme.hasClass("dextable")){
       //check for a form change, then grab dem numbers.
       var form_text = $(checkme).find("tr").eq(0).children("td").eq(0).text().trim();
-      console.log(form_text);
       if (form_text === "Stats"){
         form_text = normal_form;
       } else {
         form_text = form_text.replace("Stats - ", "");
         form_text = form_text.replace("Forme", "Form");
         form_text = form_text.replace(" Form", "");
+        form_text = form_text.replace(" " + monster_name, "");
       }
       
       var stat_row = $(checkme).find("tr").eq(2);
@@ -452,8 +469,20 @@ function get_stats(){
       checkme = checkme.next();
     } else {
       go = false;
-      console.log("Stopping");
     }
   }
+  return ret;
+}
+
+function get_egg_group_string(){
+  var ret = null;
+  var egg_group_links = $("table.dextable").eq(4).find("tr").eq(1).children("td").eq(1).find("td").eq(1).find("a");
+  egg_group_links.each(function(i){
+    if(ret === null){
+      ret = $(this).text().trim();
+    } else {
+      ret += $(this).text().trim();
+    }
+  });
   return ret;
 }

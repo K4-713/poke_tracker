@@ -114,7 +114,7 @@ function capitalize(word){
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
-function char_to_regional_variant(char){
+function img_char_to_variant(char){
   switch(char){
     case 'a' :
       return "Alolan";
