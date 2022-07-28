@@ -103,6 +103,11 @@ $(document).ready(function () {
         dex_national : dex_numbers['National'],
         region : (is_region(variant) ? variant : null),
         form : (!is_region(variant) ? variant : null),
+        type1: (types[variants[i]].type1 || null),
+        type2: (types[variants[i]].type2 || null),
+        ability1: (abilities[variants[i]].ability1 || null),
+        ability2: (abilities[variants[i]].ability2 || null),
+        ability_hidden: (abilities[variants[i]].ability_hidden || null),
         female : gender_ratios['Female'],
         male : gender_ratios['Male'],
         dex_galar: (dex_numbers['Galar'] || null),
@@ -110,11 +115,6 @@ $(document).ready(function () {
         dex_galar_crown: (dex_numbers['Crown Tundra'] || null),
         dex_sinnoh_bdsp: (dex_numbers['Sinnoh'] || null),
         dex_hisui: (dex_numbers['Hisui'] || null),
-        type1: (types[variants[i]].type1 || null),
-        type2: (types[variants[i]].type2 || null),
-        ability1: (abilities[variants[i]].ability1 || null),
-        ability2: (abilities[variants[i]].ability2 || null),
-        ability_hidden: (abilities[variants[i]].ability_hidden || null),
       };
     }
     
