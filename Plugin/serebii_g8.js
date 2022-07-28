@@ -17,6 +17,7 @@
 
 //global
 var images = [];
+var normal_form = "Normal"; //not always.
 
 $(document).ready(function () {
     document.body.style.border = "2px solid yellow";
@@ -69,12 +70,39 @@ $(document).ready(function () {
     console.log("Gender Ratios");
     console.log(gender_ratios);
     
-    for (var i in variants) {
-      //later: Differentiate between regions and forms. argh.
+    var types = get_types();
+    console.log("Types:");
+    console.log(types);
+    
+    var abilities = get_abilities();
+    console.log("Abilities!:");
+    console.log(abilities);
+    
+    //expand all the things...
+    if (types.length === 1 && variants.length > 1){
+      var temp_types = [];
+      for(var i=0; i<variants.length; ++i){
+        temp_types[variants[i]] = types[0];
+      };
+      types = temp_types;
+    }
+    if (abilities.length === 1 && variants.length > 1){
+      var temp_abilities = [];
+      for(var i=0; i<variants.length; ++i){
+        temp_abilities[variants[i]] = abilities[0];
+      };
+      abilities = temp_abilities;
+    }
+    
+    for (var i in variants) { //all the sames first
+      //differentiating regions and forms is stupid.
+      var variant = (variants[i] !== 'Normal' ? variants[i] : null);
+      
       lines[variants[i]] = {
         name : monster_name,
         dex_national : dex_numbers['National'],
-        region : (variants[i] !== 'Normal' ? variants[i] : null),
+        region : (is_region(variant) ? variant : null),
+        form : (!is_region(variant) ? variant : null),
         female : gender_ratios['Female'],
         male : gender_ratios['Male'],
         dex_galar: (dex_numbers['Galar'] || null),
@@ -82,6 +110,11 @@ $(document).ready(function () {
         dex_galar_crown: (dex_numbers['Crown Tundra'] || null),
         dex_sinnoh_bdsp: (dex_numbers['Sinnoh'] || null),
         dex_hisui: (dex_numbers['Hisui'] || null),
+        type1: (types[variants[i]].type1 || null),
+        type2: (types[variants[i]].type2 || null),
+        ability1: (abilities[variants[i]].ability1 || null),
+        ability2: (abilities[variants[i]].ability2 || null),
+        ability_hidden: (abilities[variants[i]].ability_hidden || null),
       };
     }
     
@@ -167,7 +200,11 @@ function get_img_final_name(maybe_image, poke_name){
   
   var final_name = poke_name;
   if (variant !== ''){
-    final_name += '_' + char_to_regional_variant(variant);
+    final_name += '_' + img_char_to_variant(variant);
+  } else {
+    if (normal_form !== "Normal"){
+      final_name += '_' + normal_form;
+    }
   }
   if (shiny){
     final_name += '_Shiny';
@@ -207,9 +244,47 @@ function get_date_from_mush(mush) {
 //this should return an array with at least one variant.
 //let's not make Kanto default, I don't even like that.
 function get_variants(){
+  //shoot, I'm looking in the wrong place. REMIX
   var ret = [];
-    //probably the best place to look for this will be the typing box.
-    //so same line as the name... and the only "cen" class td. Cool.
+    //Variants are in the 7th dextable, in a farther table, in bold.
+    var variants = $("table.dextable").eq(6).find("table").eq(0).find("b");
+    //now, what does this look like if there's a variant?
+    if(variants.length > 0){
+      console.log("Found some variants!");
+      variants.each(function (i) {
+        ret.push(translate_form($(this).text().trim()));
+      });
+    } else {
+      console.log("No variant types. Whew");
+      ret.push('Normal');
+    }
+    
+    //if there's no "Normal" in there, change the global synonym.
+    if (!ret.includes("Normal")) {
+      //again, this is basically a global.
+      normal_form = ret[0];
+    }
+    
+    return ret;
+}
+
+function translate_form(raw_form){
+  //let's get rid of some garbage
+  raw_form = raw_form.replace(" Forme", "");
+  raw_form = raw_form.replace(" Form", "");
+  switch (raw_form){
+    case "Hoennian" :
+      return "Normal";
+      break;
+    default :
+      return raw_form;
+  }
+}
+
+//could have plain types, or variant-based typing. gah.
+function get_types(){
+  var ret = [];
+    //Same line as the name... and the only "cen" class td. Cool.
     var types = $("table.dextable").eq(1).find("tr").eq(1).children("td.cen").eq(0);
     //now, what does this look like if there's a variant?
     //first child is a table. Rad.
@@ -218,11 +293,66 @@ function get_variants(){
       console.log("Found some variants!");
       var rows = variants.find("tr");
       rows.each(function (i) {
-        ret.push($(this).children('td').eq(0).text().trim());
+        var variant = $(this).children('td').eq(0).text().trim();
+        ret[variant] = get_types_from_links($(this).children('td').eq(1).children("a"));
       });
     } else {
-      console.log("No variants. Whew");
-      ret.push('Normal');
+      console.log("Single typing");
+      var type_links = types.children("a");
+      ret.push(get_types_from_links(type_links));
+    }
+    return ret;
+}
+
+function get_types_from_links(links){
+  var ret = {};
+  var counter = 1; //harumph
+  links.each(function(i){
+    ret["type" + counter] = get_type_from_link($(this).attr('href'));
+    counter += 1;
+  });
+  return ret;
+}
+
+//This is gonna get ugly.
+function get_abilities(){
+  var ret = [];
+    var maybe_abilities = $("table.dextable").eq(2).find("tr").eq(1).find("b");
+    
+    if(maybe_abilities.length > 0){
+      var variant = normal_form;
+      var ha_flag = false;
+      var build_me = {};
+      maybe_abilities.each(function (i) {
+        var maybe_ability = $(this).text().trim();
+        //here, we either have an ability, a Hidden Ability marker, or a form changer. Or garbage.
+
+        if (ha_flag){
+          build_me.ability_hidden = maybe_ability;
+          ha_flag = false;
+          return;
+        }
+        if (maybe_ability.includes("Hidden Ability")){
+          ha_flag = true;
+          return;
+        }
+        if (maybe_ability.includes("Form Abilit") || maybe_ability.includes("Forme Abilit")){
+          var new_form = maybe_ability.split(" ")[0];
+          ret[variant] = build_me;
+          build_me = {};
+          variant = new_form;
+          return;
+        }
+        //If we're still here, it's just an ability. Enjoy it.
+        if ((build_me.ability1 || false)){
+          build_me.ability2 = maybe_ability;
+        } else {
+          build_me.ability1 = maybe_ability;
+        }
+      });
+      ret[variant] = build_me;
+    } else {
+      console.error("No abilities found!");
     }
     return ret;
 }
@@ -270,7 +400,8 @@ function get_gender_ratios(){
         ret[gender] = parseFloat(percent);
       });
     } else {
-      console.error("Problem: No genders!");
+      ret["Male"] = null;
+      ret["Female"] = null;
     }
     return ret;
 }

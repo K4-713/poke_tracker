@@ -105,7 +105,9 @@ function get_ints(int_string) {
 function get_type_from_link(link) {
   //example: "/pokemon/type/grass"
   var type_array = link.split('/');
-  return capitalize(type_array[3]);
+  var type = capitalize(type_array[type_array.length - 1]);
+  type = type.split('.')[0]; //just in case. g8 links to .shtml files. 
+  return type;
 }
 
 function capitalize(word){
@@ -123,6 +125,9 @@ function char_to_regional_variant(char){
     case 'h' :
       return "Hisuian";
       break;
+    case 'o' :
+      return "Origin";
+      break;
     case 'n' :
       return "Normal";  //do I like this?
       break;
@@ -130,6 +135,11 @@ function char_to_regional_variant(char){
       return char + "-Undefined";
       break;
   }
+}
+
+function is_region(variant){
+  var regional_forms = ["Galarian", "Alolan", "Hisuian"];
+  return regional_forms.includes(variant);
 }
 
 function fix_img_src(src){
