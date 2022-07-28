@@ -298,6 +298,9 @@ function translate_form(raw_form){
   raw_form = raw_form.replace(" Forme", "");
   raw_form = raw_form.replace(" Form", "");
   switch (raw_form){
+    case "Alola" :
+      return "Alolan";
+      break;
     case "Kantonian" :
     case "Johtonian" :
     case "Hoennian" :
@@ -367,7 +370,7 @@ function get_abilities(){
           var new_form = maybe_ability.split(" ")[0];
           ret[variant] = build_me;
           build_me = {};
-          variant = new_form;
+          variant = translate_form(new_form);
           return;
         }
         //If we're still here, it's just an ability. Enjoy it.
@@ -485,4 +488,16 @@ function get_egg_group_string(){
     }
   });
   return ret;
+}
+
+function get_catchable(variants){
+  //Assumption: For each game, if it's catchable in that game's region, 
+  //and there's specifically a variant named for the region, 
+  //that's the catchable one. Any others probably aren't.
+  //.
+  //For each game, if there's no specific variant for that region, and there's a region
+  //callout, that one isn't catchable there.
+  //
+  //If there are no regional variants, they're all catchable.
+  
 }
