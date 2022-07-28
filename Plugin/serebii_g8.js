@@ -46,16 +46,16 @@ $(document).ready(function () {
       });
     }
     
-    //NEW PLAN: Show what we're about to save in the dealie. Add buttons to actually do the thing(s)
-    
-    
-    //what else can we get frmm this page?
-    //dynamaxer?
-    //mega?
-    //...maybe we'll want to track held items later. LATER I SAID. Per-game.
+    //what else can we get from this page?
+    //stats per form(e)
     //egg groups - none means sterile!
-    //evolutionary line and requirements
-    //per-game locations (later, I think. Maybe.)
+    //  Just one big csv string is fine, but we only get 32 chars for now.
+    //catchability in different g8 games
+    
+    //LATER - needs new tables and/or a schema change.
+    //evolutionary line and requirements - new dealie pane? oof.
+    //  dynamaxer? mega-able?
+    //...maybe we'll want to track held items way later.
     var lines =[];
     
     var variants = get_variants();
@@ -77,6 +77,10 @@ $(document).ready(function () {
     var abilities = get_abilities();
     console.log("Abilities!:");
     console.log(abilities);
+    
+    var stats = get_stats();
+    console.log("Stats:");
+    console.log(stats);
     
     //expand all the things...
     if (types.length === 1 && variants.length > 1){
@@ -108,6 +112,12 @@ $(document).ready(function () {
         ability1: (abilities[variants[i]].ability1 || null),
         ability2: (abilities[variants[i]].ability2 || null),
         ability_hidden: (abilities[variants[i]].ability_hidden || null),
+        b_hp : (stats[variants[i]].b_hp || null),
+        b_att : (stats[variants[i]].b_att || null),
+        b_def : (stats[variants[i]].b_def || null),
+        b_sp_att : (stats[variants[i]].b_sp_att || null),
+        b_sp_def : (stats[variants[i]].b_sp_def || null),
+        b_speed : (stats[variants[i]].b_speed || null),
         female : gender_ratios['Female'],
         male : gender_ratios['Male'],
         dex_galar: (dex_numbers['Galar'] || null),
@@ -385,23 +395,65 @@ function get_dex_numbers(){
 //Get gender ratios
 function get_gender_ratios(){
   var ret = [];
-    //Second Dex table, Second row, column 4
-    var main_cell = $("table.dextable").eq(1).find("tr").eq(1).children().eq(3);
-    
-    //first child is a table. Still rad.
-    var genders = main_cell.children("table");
-    if(genders.length > 0){
-      var rows = genders.find("tr");
-      rows.each(function (i) {
-        var gender = $(this).children('td').eq(0).text().trim();
-        gender = gender.split(" ")[0];
-        var percent = $(this).children('td').eq(1).text().trim();
-        percent = percent.replace('%', '');
-        ret[gender] = parseFloat(percent);
-      });
+  //Second Dex table, Second row, column 4
+  var main_cell = $("table.dextable").eq(1).find("tr").eq(1).children().eq(3);
+
+  //first child is a table. Still rad.
+  var genders = main_cell.children("table");
+  if(genders.length > 0){
+    var rows = genders.find("tr");
+    rows.each(function (i) {
+      var gender = $(this).children('td').eq(0).text().trim();
+      gender = gender.split(" ")[0];
+      var percent = $(this).children('td').eq(1).text().trim();
+      percent = percent.replace('%', '');
+      ret[gender] = parseFloat(percent);
+    });
+  } else {
+    ret["Male"] = null;
+    ret["Female"] = null;
+  }
+  return ret;
+}
+
+//Get stats
+function get_stats(){
+  var ret = [];
+  var stat_anchor = $("a[name='stats']");
+  //while the next sibling is a table.dextable, we have more stats.
+  
+  var checkme = stat_anchor.next();
+  var go = true;
+  while (go) {
+    if (checkme.is("table") && checkme.hasClass("dextable")){
+      //check for a form change, then grab dem numbers.
+      var form_text = $(checkme).find("tr").eq(0).children("td").eq(0).text().trim();
+      console.log(form_text);
+      if (form_text === "Stats"){
+        form_text = normal_form;
+      } else {
+        form_text = form_text.replace("Stats - ", "");
+        form_text = form_text.replace("Forme", "Form");
+        form_text = form_text.replace(" Form", "");
+      }
+      
+      var stat_row = $(checkme).find("tr").eq(2);
+      
+      var build_me = {
+        b_hp : $(stat_row).children("td").eq(1).text().trim(),
+        b_att : $(stat_row).children("td").eq(2).text().trim(),
+        b_def : $(stat_row).children("td").eq(3).text().trim(),
+        b_sp_att : $(stat_row).children("td").eq(4).text().trim(),
+        b_sp_def : $(stat_row).children("td").eq(5).text().trim(),
+        b_speed : $(stat_row).children("td").eq(6).text().trim(),
+      }
+      
+      ret[form_text] = build_me;
+      checkme = checkme.next();
     } else {
-      ret["Male"] = null;
-      ret["Female"] = null;
+      go = false;
+      console.log("Stopping");
     }
-    return ret;
+  }
+  return ret;
 }
