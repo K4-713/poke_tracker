@@ -52,7 +52,7 @@ CREATE TABLE mons (
   catchable_usum BOOLEAN DEFAULT NULL,
   catchable_swsh BOOLEAN DEFAULT NULL,
   catchable_bdsp BOOLEAN DEFAULT NULL,
-  catchable_hisui BOOLEAN DEFAULT NULL,
+  catchable_pla BOOLEAN DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE poke_unique (name, region, form)
 );

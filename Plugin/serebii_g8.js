@@ -80,6 +80,10 @@ $(document).ready(function () {
     console.log("Stats:");
     console.log(stats);
     
+    var catchable = get_catchable(variants);
+    console.log("Catchable");
+    console.log(catchable);
+    
     //expand all the things that *could* be per-variant, but may not be
     types = expand_array(types, variants);
     abilities = expand_array(abilities, variants);
@@ -113,6 +117,9 @@ $(document).ready(function () {
         dex_galar_crown: (dex_numbers['Crown Tundra'] || null),
         dex_sinnoh_bdsp: (dex_numbers['Sinnoh'] || null),
         dex_hisui: (dex_numbers['Hisui'] || null),
+        catchable_swsh: (catchable[variants[i]].catchable_swsh || null),
+        catchable_bdsp: (catchable[variants[i]].catchable_bdsp || null),
+        catchable_pla: (catchable[variants[i]].catchable_pla || null),
       };
     }
     
@@ -283,6 +290,7 @@ function translate_form(raw_form){
     case "Kantonian" :
     case "Johtonian" :
     case "Hoennian" :
+    case "Unovan" :
       return "Normal";
       break;
     default :
@@ -479,4 +487,95 @@ function get_catchable(variants){
   //
   //If there are no regional variants, they're all catchable.
   
+}
+
+//Get catchable games
+function get_catchable(variants){
+  var ret = [];
+  for(var i=0; i<variants.length; ++i){
+    ret[variants[i]] = {
+      catchable_swsh : false,
+      catchable_bdsp : false,
+      catchable_pla : false
+    };
+  };
+  
+  var stat_anchor = $("a[name='location']").eq(0);
+  //while the next sibling is a table.dextable, we have more stats.
+  var checkme = stat_anchor.next();
+  if (checkme.is("table") && checkme.hasClass("dextable")){
+    console.log("Found the location table");
+    //step through the game lines
+    var rows = $(checkme).find("tr");
+    rows.each(function(i) {
+      var tds = $(this).children("td");
+      var game = false;
+      var locations = false;
+      if (tds.length === 2 || tds.length === 3){
+        game = get_game_from_location_text($(this).children("td").eq(0).text().trim());
+        locations = $(this).children("td").eq(1);
+      }
+      if (tds.length === 4){
+        game = get_game_from_location_text($(this).children("td").eq(1).text().trim());
+        locations = $(this).children("td").eq(2);
+      }
+
+      if (game){
+        switch(game){
+          case "swsh":
+            if (variants.includes("Galarian")){
+              ret["Galarian"].catchable_swsh = true;
+              return;
+            } else {
+              if ($(locations).find("a").length > 0){ //links mean yes! I think.
+                //set the normal one to true
+                ret[normal_form].catchable_swsh = true;
+              }
+            }
+            break;
+          case "bdsp":
+            if ($(locations).find("a").length > 0){ //links mean yes! I think.
+              //set the normal one to true
+              ret[normal_form].catchable_bdsp = true;
+            }
+            break;
+          case "pla":
+            if (variants.includes("Hisuian")){
+              ret["Hisuian"].catchable_pla = true;
+              return;
+            } else {
+              if ($(locations).find("a").length > 0){ //links mean yes! I think.
+                //set the normal one to true
+                ret[normal_form].catchable_pla = true;
+              }
+            }
+            break;
+        }
+      }
+    });
+    
+  } else {
+    console.error("No location data found");
+    return false;
+  }
+  
+  return ret;
+}
+
+function get_game_from_location_text(text){
+  switch (text){
+    case "Sword":
+    case "Shield":
+      return "swsh";
+      break;
+    case "Brilliant Diamond":
+    case "Shining Pearl":
+      return "bdsp";
+      break;
+    case "Legends: Arceus":
+      return "pla";
+      break;
+    default:
+      return false;
+  }
 }
