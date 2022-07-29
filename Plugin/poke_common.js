@@ -357,3 +357,34 @@ function disappear(element) {
   element.css('visibility', 'none')
           .css('height', '0px');
 }
+
+/**
+ * I had to do this several times, so... 
+ * If expand_me is only one row, copy it once for each key supplied and return
+ * @param array|Object expand_me
+ * @param array keys
+ * @returns array|Object expanded expand_me if there was only one row there, or the original
+ */
+function expand_array(expand_me, keys) {
+  //actual array
+  if (expand_me.length === 1 && keys.length > 1){
+    var temp_expand_me = [];
+    for(var i=0; i<keys.length; ++i){
+      temp_expand_me[keys[i]] = expand_me[0];
+    };
+    return temp_expand_me;
+  }
+  
+  //for some daffy reason, stats.length is always zero if the keys are named instead of numeric.
+  //because I guess that rips a hole in the universe. k.
+  if (Object.keys(expand_me).length === 1 && keys.length > 1){
+    var temp_expand_me = [];
+    for(var i=0; i<keys.length; ++i){
+      temp_expand_me[keys[i]] = expand_me[Object.keys(expand_me)[0]];
+    };
+    return temp_expand_me;
+  }
+  
+  return expand_me;
+  
+}

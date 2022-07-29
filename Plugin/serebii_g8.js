@@ -80,31 +80,10 @@ $(document).ready(function () {
     console.log("Stats:");
     console.log(stats);
     
-    //expand all the things...
-    if (types.length === 1 && variants.length > 1){
-      var temp_types = [];
-      for(var i=0; i<variants.length; ++i){
-        temp_types[variants[i]] = types[0];
-      };
-      types = temp_types;
-    }
-    if (abilities.length === 1 && variants.length > 1){
-      var temp_abilities = [];
-      for(var i=0; i<variants.length; ++i){
-        temp_abilities[variants[i]] = abilities[0];
-      };
-      abilities = temp_abilities;
-    }
-    
-    //for some daffy reason, stats.length here is always zero... wat?
-    if (Object.keys(stats).length === 1 && variants.length > 1){
-      console.log("Tryin to expand stats here...");
-      var temp_stats = [];
-      for(var i=0; i<variants.length; ++i){
-        temp_stats[variants[i]] = stats[normal_form];
-      };
-      stats = temp_stats;
-    }    
+    //expand all the things that *could* be per-variant, but may not be
+    types = expand_array(types, variants);
+    abilities = expand_array(abilities, variants);
+    stats = expand_array(stats, variants);
     
     for (var i in variants) { //all the sames first
       //differentiating regions and forms is stupid.
@@ -329,7 +308,7 @@ function get_types(){
     } else {
       console.log("Single typing");
       var type_links = types.children("a");
-      ret.push(get_types_from_links(type_links));
+      ret[normal_form] = get_types_from_links(type_links);
     }
     return ret;
 }
@@ -479,12 +458,12 @@ function get_stats(){
 
 function get_egg_group_string(){
   var ret = null;
-  var egg_group_links = $("table.dextable").eq(4).find("tr").eq(1).children("td").eq(1).find("td").eq(1).find("a");
+  var egg_group_links = $("table.dextable").eq(4).find("tr").eq(1).children("td").eq(1).find("a");
   egg_group_links.each(function(i){
     if(ret === null){
       ret = $(this).text().trim();
     } else {
-      ret += $(this).text().trim();
+      ret += ", " + $(this).text().trim();
     }
   });
   return ret;
