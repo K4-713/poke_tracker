@@ -113,12 +113,22 @@ function handle_request($data) {
       }
       break;
     case 'g8_dex':
+      $insert_count = 0;
+      $update_count = 0;
       foreach ($data['rows'] as $key => $value){
         if (is_array($value) && array_key_exists('name', $value)){
-          check_mon_exists($value['name'], @$value['region'], @$value['form']); //bite me: this is fine
+          $update = check_mon_exists($value['name'], @$value['region'], @$value['form']); //bite me: this is fine
+          $temp_data[0] = $value;
+          if($update){
+            $update_count += db_query('update', 'g8_dex', $temp_data );
+          } else {
+            $insert_count += db_query('insert', 'g8_dex', $temp_data );
+          }
+        } else {
+          return_result('failure', "No mon name received: " . print_r($value));
         }
       }
-      check_mon_exists();
+      return_result('success', "$update_count rows updated, $insert_count rows inserted.");
       break;
     case 'tag_legends':
       $rowcount = 0;
@@ -229,7 +239,9 @@ function get_data_model_info($action) {
       'catchable_bdsp' => 'bool|null',
       'catchable_pla' => 'bool|null',
   );
-  $model_info['g8_dex']['insert_update'] = query_build($model_info['g8_dex']['data'], 'insert_update', 'mons');
+  $model_info['g8_dex']['table'] = "mons";
+  $model_info['g8_dex']['insert'] = query_build($model_info['g8_dex']['data'], 'insert', $model_info['g8_dex']['table']);
+  $model_info['g8_dex']['update'] = query_build($model_info['g8_dex']['data'], 'update', $model_info['g8_dex']['table']);
   
   /** tag_legends **/
   $model_info['tag_legends']['data'] = array(
@@ -284,6 +296,21 @@ function db_query($action, $query_type, $data) {
     $data_structure = $model_info[$query_type]['data'];
   } else {
     $data_structure = $model_info['data'];
+  }
+  
+  //if the quety type is an update, we need to reorder the structure with the composite keys at the end.
+  //I think.
+  if ($query_type === "update") {
+    $table = $model_info[$query_type]['table'];
+    $composite_keys = get_table_composite_keys( $table );
+    //remove the composite keys from the set data
+    $set_data = $data_structure;
+    foreach ($composite_keys as $key => $value) {
+      if (array_key_exists($key, $set_data)){
+        unset($set_data[$key]);
+      }
+    }
+    $data_structure = array_merge($set_data, $composite_keys);
   }
 
   //Try this, kids at home!
@@ -365,7 +392,6 @@ function query_build($structure, $query_type, $table) {
       $query['binding'] = query_get_binding_string($structure);
       break;
     case 'update' :
-      //these go in the WHERE clause.
       $composite_keys = get_table_composite_keys( $table );
       $query['query'] = "UPDATE $table "; //er...?
       //remove the composite keys from the set data
@@ -573,14 +599,17 @@ function db_raw_query($query) {
 }
 
 function check_mon_exists($name, $region = null, $form = null){
-  $query = "SELECT count(*) from mons where";
+  $query = "SELECT count(*) as count from mons where";
   $query .= " name " . format_raw_query_equivalence($name); 
   $query .= " AND region " . format_raw_query_equivalence($region);
   $query .= " AND form " . format_raw_query_equivalence($form);
   $count = db_raw_query($query);
   
-  return_result('failure', "Found " . print_r($count, true) . " matches");
-  return false;
+  if (array_key_exists('count', $count) && $count['count'] > 0 ){
+    return true;
+  } else {
+    return false;
+  }
 }
 
 function format_raw_query_equivalence($value){
