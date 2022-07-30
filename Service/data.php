@@ -105,13 +105,20 @@ function handle_request($data) {
 
   switch ($action) {
     case 'natdex_index':
-    case 'g8_dex':
       $rowcount = db_multi_query($action, 'insert_update', $data['rows']);
       if ($rowcount > 0) {
         return_result('success', "$action: $rowcount rows updated");
       } else {
         return_result('failure', "Problem writing to the database");
       }
+      break;
+    case 'g8_dex':
+      foreach ($data['rows'] as $key => $value){
+        if (is_array($value) && array_key_exists('name', $value)){
+          check_mon_exists($value['name'], @$value['region'], @$value['form']); //bite me: this is fine
+        }
+      }
+      check_mon_exists();
       break;
     case 'tag_legends':
       $rowcount = 0;
@@ -152,6 +159,22 @@ function get_expected_data($action) {
 	return $dmi['data'];
     }
     return false;
+}
+
+function get_table_composite_keys( $table ) {
+  $composite_keys = array(
+      'mons' => array(
+        'name' => 'varchar_32',
+        'region' => 'varchar_16|null',
+        'form' => 'varchar_16|null',
+      )
+  );
+  if (array_key_exists($table, $composite_keys)){
+    return $composite_keys[$table];
+  } else {
+    return_result('failure', "No composite keys for table '$table'");
+    return false;
+  }
 }
 
 //Tryna refactor a few things at a time with this
@@ -207,7 +230,6 @@ function get_data_model_info($action) {
       'catchable_pla' => 'bool|null',
   );
   $model_info['g8_dex']['insert_update'] = query_build($model_info['g8_dex']['data'], 'insert_update', 'mons');
-
   
   /** tag_legends **/
   $model_info['tag_legends']['data'] = array(
@@ -336,6 +358,27 @@ function query_build($structure, $query_type, $table) {
       $query['query'] .= query_build_odku_values($structure);
       $query['binding'] = query_get_binding_string($structure) . query_get_binding_string($structure);
       break;
+    case 'insert' :
+      $query['query'] = "INSERT INTO $table ";
+      $query['query'] .= query_build_insert_fields($structure) . " ";
+      $query['query'] .= "VALUES " . query_qmarks($structure) . " ";
+      $query['binding'] = query_get_binding_string($structure);
+      break;
+    case 'update' :
+      //these go in the WHERE clause.
+      $composite_keys = get_table_composite_keys( $table );
+      $query['query'] = "UPDATE $table "; //er...?
+      //remove the composite keys from the set data
+      $set_data = $structure;
+      foreach ($composite_keys as $key => $value) {
+        if (array_key_exists($key, $set_data)){
+          unset($set_data[$key]);
+        }
+      }
+      $query['query'] .= "SET " . query_build_setwhere_fields($set_data) . ' ';
+      $query['query'] .= "WHERE " . query_build_setwhere_fields($composite_keys, true);
+      $query['binding'] = query_get_binding_string(array_merge($set_data, $composite_keys));
+      break;
     default :
       return_result('failure', "Invalid query type '$query_type'");
   }
@@ -344,6 +387,19 @@ function query_build($structure, $query_type, $table) {
 
 function query_build_insert_fields($structure) {
   $fields = implode(', ', array_keys($structure));
+  return "($fields)";
+}
+
+function query_build_setwhere_fields($structure, $where=false) {
+  //for use in update statements.
+  foreach($structure as $key => $value){
+    $structure[$key] = $structure[$key] . " = ?";
+  }
+  if ($where) {
+    $fields = implode(' AND ', $structure);
+  } else {
+    $fields = implode(', ', $structure);
+  }
   return "($fields)";
 }
 
@@ -514,6 +570,27 @@ function db_raw_query($query) {
 	$ret[] = $row;
     }
     return $ret;
+}
+
+function check_mon_exists($name, $region = null, $form = null){
+  $query = "SELECT count(*) from mons where";
+  $query .= " name " . format_raw_query_equivalence($name); 
+  $query .= " AND region " . format_raw_query_equivalence($region);
+  $query .= " AND form " . format_raw_query_equivalence($form);
+  $count = db_raw_query($query);
+  
+  return_result('failure', "Found " . print_r($count, true) . " matches");
+  return false;
+}
+
+function format_raw_query_equivalence($value){
+  if (is_null($value)){
+    return 'IS NULL';
+  }
+  if (is_numeric($value)){
+    return '= ' . $value;
+  }
+  return "= '$value'";
 }
 
 function update_gourmet_list_from_jn($items) {
