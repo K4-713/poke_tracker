@@ -105,6 +105,7 @@ function handle_request($data) {
 
   switch ($action) {
     case 'natdex_index':
+    case 'g8_dex':
       $rowcount = db_multi_query($action, 'insert_update', $data['rows']);
       if ($rowcount > 0) {
         return_result('success', "$action: $rowcount rows updated");
@@ -174,6 +175,38 @@ function get_data_model_info($action) {
       'dex_national' => 'int'
   );
   $model_info['natdex_index']['insert_update'] = query_build($model_info['natdex_index']['data'], 'insert_update', 'mons');
+
+  
+  /** g8_dex **/
+  $model_info['g8_dex']['data'] = array(
+      'name' => 'varchar_32',
+      'dex_national' => 'int',
+      'region' => 'varchar_16|null',
+      'form' => 'varchar_16|null',
+      'type1' => 'varchar_16',
+      'type2' => 'varchar_16|null',
+      'ability1' => 'varchar_16',
+      'ability2' => 'varchar_16|null',
+      'ability_hidden' => 'varchar_16|null',
+      'b_att' => 'int',
+      'b_def' => 'int',
+      'b_hp' => 'int',
+      'b_sp_att' => 'int',
+      'b_sp_def' => 'int',
+      'b_speed' => 'int',
+      'female' => 'number|null',
+      'male' => 'number|null',
+      'egg_groups' => 'varchar_32|null',
+      'dex_galar' => 'int|null',
+      'dex_galar_isle' => 'int|null',
+      'dex_galar_crown' => 'int|null',
+      'dex_sinnoh_bdsp' => 'int|null',
+      'dex_hisui' => 'int|null',
+      'catchable_swsh' => 'bool|null',
+      'catchable_bdsp' => 'bool|null',
+      'catchable_pla' => 'bool|null',
+  );
+  $model_info['g8_dex']['insert_update'] = query_build($model_info['g8_dex']['data'], 'insert_update', 'mons');
 
   
   /** tag_legends **/
@@ -340,6 +373,7 @@ function query_build_odku_values($structure) {
     return $odku;
 }
 
+//
 function query_get_binding_string($structure) {
   $binding = '';
   foreach ($structure as $field => $type) {
@@ -353,6 +387,9 @@ function query_get_binding_string($structure) {
         break;
       case 'varchar':
         $binding .= 's';
+        break;
+      case 'number':
+        $binding .= 'd';
         break;
       default:
         return_result('failure', "Unhandled var type '$type' for field '$field' ($mod_type)");

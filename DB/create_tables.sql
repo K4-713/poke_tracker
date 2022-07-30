@@ -17,7 +17,7 @@
 
 CREATE TABLE mons (
   id int(11) NOT NULL AUTO_INCREMENT,
-  name varchar(32) DEFAULT NULL,
+  name varchar(32) NOT NULL,
   dex_national int(11) DEFAULT NULL,
   region varchar(16) DEFAULT NULL,
   form varchar(16) DEFAULT NULL,

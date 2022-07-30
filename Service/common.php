@@ -175,6 +175,15 @@ function check_int($value) {
     return false;
 }
 
+//Use for float. Close enough
+function check_number($value) {
+  if (is_numeric($value)) {
+    return true;
+  }
+  //error_log("Not an integer? '$value");
+  return false;
+}
+
 
 function check_bool($value) {
   if ($value === true || $value === false) {
