@@ -238,6 +238,9 @@ function add_dealie_to_page(message, panes = 1) {
 
 function set_dealie_message(message, pane = 1){
     $('#dealie_message_' + pane).html(message);
+    //just in case...
+    $('#interface_dealie ul').css('padding-left', '6px')
+        .css('text-align', 'left');
 }
 
 function add_button_to_dealie(button_text, button_callback, pane = 1) {
@@ -377,7 +380,7 @@ function expand_array(expand_me, keys) {
   
   //for some daffy reason, stats.length is always zero if the keys are named instead of numeric.
   //because I guess that rips a hole in the universe. k.
-  if (Object.keys(expand_me).length === 1 && keys.length > 1){
+  if (get_named_key_array_length(expand_me) === 1 && keys.length > 1){
     var temp_expand_me = [];
     for(var i=0; i<keys.length; ++i){
       temp_expand_me[keys[i]] = expand_me[Object.keys(expand_me)[0]];
@@ -387,4 +390,8 @@ function expand_array(expand_me, keys) {
   
   return expand_me;
   
+}
+
+function get_named_key_array_length(arrgh){
+  return (Object.keys(arrgh).length);
 }

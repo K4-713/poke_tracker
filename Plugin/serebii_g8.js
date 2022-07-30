@@ -47,14 +47,10 @@ $(document).ready(function () {
       });
     }
     
-    //what else can we get from this page?
-    //catchability in different g8 games
-    
     //LATER - needs new tables and/or a schema change.
     //evolutionary line and requirements - new dealie pane? oof.
     //  dynamaxer? mega-able?
     //...maybe we'll want to track held items way later.
-    var lines =[];
     
     var variants = get_variants();
     console.log("Variants:");
@@ -89,11 +85,15 @@ $(document).ready(function () {
     abilities = expand_array(abilities, variants);
     stats = expand_array(stats, variants);
     
+    var li_fillet = ""; //wait for it...
+    
+    var sendMe =[];
+    
     for (var i in variants) { //all the sames first
       //differentiating regions and forms is stupid.
       var variant = (variants[i] !== 'Normal' ? variants[i] : null);
       
-      lines[variants[i]] = {
+      sendMe.push({
         name : monster_name,
         dex_national : dex_numbers['National'],
         region : (is_region(variant) ? variant : null),
@@ -120,37 +120,26 @@ $(document).ready(function () {
         catchable_swsh: (catchable[variants[i]].catchable_swsh || null),
         catchable_bdsp: (catchable[variants[i]].catchable_bdsp || null),
         catchable_pla: (catchable[variants[i]].catchable_pla || null),
-      };
+      });
+      li_fillet += "<li>" + variants[i] + "</li>"; //...wait for it...
     }
     
     console.log("FINAL:");
-    console.log(lines);
+    console.log(sendMe);
     
-    //what else do we have to do differently if we have multiple variants?
+    var main_message = "Scraped " + sendMe.length + " variants:";
+    main_message += "<ul>";
+    main_message += li_fillet; //there it is
+    main_message += "</ul>";
+    set_dealie_message(main_message, 1);
     
-    //each variant should get its own built-out line to submit.
-    //types
-    //stats
-    //abilities (fff)
-    //evolution chain (double fff - okay, wait, this is okay: Images are named predictably!)
-    //moves, but that's for later. Way, way later.
-
-
-//    var sendMe = [];
-//    var main_data = {
-//	'item_name': item_name,
-//	'rarity': rarity,
-//	'release_date': release_date,
-//	'price_history': price_history
-//    }
-
-    //Annoying. Oh well.
-    //sendMe.push(main_data);
-
-    //Er. You wanna do some error checking before we do this, or...?
-    //do_ajax('jn_item', sendMe);
-
+    add_button_to_dealie("Send 'em home!", function(){send_it_on_home(sendMe);}, 1);
 });
+
+function send_it_on_home(mons){
+  console.log("CLICK");
+  do_ajax('g8_dex', mons);
+}
 
 function add_image_info(images, monster_name){
   var maybe_image = $("img#sprite-regular");
@@ -163,7 +152,7 @@ function add_image_info(images, monster_name){
     images[get_img_final_name(maybe_image, monster_name)] = "https://www.serebii.net" + fix_img_src(maybe_image.attr('src'));
   }
 
-  var message = "<ul style='padding-left:6px;text-align:left'>";
+  var message = "<ul>";
   for (var i in images) {
     message += "<li><a style='color:#998800' href='" + images[i] + "' target=_new>" + i + "</a></li>";
   }
