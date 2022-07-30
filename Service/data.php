@@ -419,7 +419,7 @@ function query_build_insert_fields($structure) {
 function query_build_setwhere_fields($structure, $where=false) {
   //for use in update statements.
   foreach($structure as $key => $value){
-    $structure[$key] = $structure[$key] . " = ?";
+    $structure[$key] = $key . " = ?";
   }
   if ($where) {
     $fields = implode(' AND ', $structure);
@@ -605,7 +605,7 @@ function check_mon_exists($name, $region = null, $form = null){
   $query .= " AND form " . format_raw_query_equivalence($form);
   $count = db_raw_query($query);
   
-  if (array_key_exists('count', $count) && $count['count'] > 0 ){
+  if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){
     return true;
   } else {
     return false;
