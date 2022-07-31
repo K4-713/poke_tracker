@@ -120,9 +120,9 @@ function handle_request($data) {
           $update = check_mon_exists($value['name'], @$value['region'], @$value['form']); //bite me: this is fine
           $temp_data[0] = $value;
           if($update){
-            $update_count += db_query('update', 'g8_dex', $temp_data );
+            $update_count += db_query('g8_dex', 'update', $temp_data );
           } else {
-            $insert_count += db_query('insert', 'g8_dex', $temp_data );
+            $insert_count += db_query('g8_dex', 'insert', $temp_data );
           }
         } else {
           return_result('failure', "No mon name received: " . print_r($value));
@@ -286,6 +286,7 @@ function db_query($action, $query_type, $data) {
   if (!$stmt) {
     error_log(__FUNCTION__ . ": $action, $query_type query unpreparable.");
     error_log($query);
+//    return_result("failure", "$action, $query_type query unpreparable. :" . $query);
     return false;
   }
 
@@ -301,7 +302,7 @@ function db_query($action, $query_type, $data) {
   //if the quety type is an update, we need to reorder the structure with the composite keys at the end.
   //I think.
   if ($query_type === "update") {
-    $table = $model_info[$query_type]['table'];
+    $table = $model_info['table'];
     $composite_keys = get_table_composite_keys( $table );
     //remove the composite keys from the set data
     $set_data = $data_structure;
@@ -312,7 +313,7 @@ function db_query($action, $query_type, $data) {
     }
     $data_structure = array_merge($set_data, $composite_keys);
   }
-
+  
   //Try this, kids at home!
   extract($data_structure);
   $params = array(
@@ -426,7 +427,7 @@ function query_build_setwhere_fields($structure, $where=false) {
   } else {
     $fields = implode(', ', $structure);
   }
-  return "($fields)";
+  return $fields;
 }
 
 function query_qmarks($structure) {
