@@ -299,7 +299,7 @@ function db_query($action, $query_type, $data) {
     $data_structure = $model_info['data'];
   }
   
-  //if the quety type is an update, we need to reorder the structure with the composite keys at the end.
+  //if the query type is an update, we need to reorder the structure with the composite keys at the end.
   //I think.
   if ($query_type === "update") {
     $table = $model_info['table'];
@@ -419,8 +419,13 @@ function query_build_insert_fields($structure) {
 
 function query_build_setwhere_fields($structure, $where=false) {
   //for use in update statements.
+  $comparator = " = ?";
+  if ($where) {
+    //SPACESHIP
+    $comparator = " <=> ?";
+  }
   foreach($structure as $key => $value){
-    $structure[$key] = $key . " = ?";
+    $structure[$key] = $key . $comparator;
   }
   if ($where) {
     $fields = implode(' AND ', $structure);
