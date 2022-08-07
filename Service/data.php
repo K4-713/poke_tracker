@@ -625,6 +625,9 @@ function format_raw_query_equivalence($value){
   if (is_numeric($value)){
     return '= ' . $value;
   }
+  //real escaping is kinda dum.
+  $db = db_connect();
+  $value = $db->real_escape_string($value);
   return "= '$value'";
 }
 
