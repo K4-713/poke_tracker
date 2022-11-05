@@ -299,7 +299,7 @@ function get_types(){
       console.log("Found some variants!");
       var rows = variants.find("tr");
       rows.each(function (i) {
-        var variant = $(this).children('td').eq(0).text().trim();
+        var variant = translate_form($(this).children('td').eq(0).text().trim());
         ret[variant] = get_types_from_links($(this).children('td').eq(1).children("a"));
       });
     } else {
