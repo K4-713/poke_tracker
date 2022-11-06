@@ -395,3 +395,19 @@ function expand_array(expand_me, keys) {
 function get_named_key_array_length(arrgh){
   return (Object.keys(arrgh).length);
 }
+
+function get_next_number_link(number){
+  links = $("div#content").find("td[align=right]").find("a");
+  console.log("Links?");
+  console.log(links);
+  for(var i=0; i<links.length; ++i){
+    if (links[i].innerHTML.includes("#"+(number+1))){
+      console.log("returning a link");
+      links[i].innerHTML = links[i].innerHTML.replace("<br>", " - ");
+      $(links[i]).css("color", "#000000");
+      return links[i];
+    }
+  }
+  console.log("Returning no link");
+  return false;
+}

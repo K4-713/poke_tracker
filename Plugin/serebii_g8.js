@@ -23,7 +23,7 @@ var monster_name = ""; //gah
 $(document).ready(function () {
     document.body.style.border = "2px solid yellow";
     console.log("THIS IS YOUR EXTENSION. Helloooo.");
-    add_dealie_to_page("This is a dealie.", 2);
+    add_dealie_to_page("This is a dealie.", 3);
     add_button_to_dealie("Download Images", download_images, pane = 2);
     unset_dealie_css('height');
 
@@ -79,6 +79,9 @@ $(document).ready(function () {
     var catchable = get_catchable(variants);
     console.log("Catchable");
     console.log(catchable);
+    
+    var next_link = get_next_number_link(dex_numbers['National']);
+    set_dealie_message(next_link, 3);
     
     //expand all the things that *could* be per-variant, but may not be
     types = expand_array(types, variants);
