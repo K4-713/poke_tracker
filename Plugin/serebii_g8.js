@@ -52,23 +52,24 @@ $(document).ready(function () {
     //  dynamaxer? mega-able?
     //...maybe we'll want to track held items way later.
     
-    var variants = get_variants();
-    console.log("Variants:");
-    console.log(variants);
-    
     var dex_numbers = get_dex_numbers();
     console.log("Dex Numbers:");
     console.log(dex_numbers);
+    var natdex = dex_numbers["National"];
+    
+    var variants = get_variants(natdex);
+    console.log("Variants:");
+    console.log(variants);
     
     var gender_ratios = get_gender_ratios();
     console.log("Gender Ratios");
     console.log(gender_ratios);
     
-    var types = get_types();
+    var types = get_types(natdex);
     console.log("Types:");
     console.log(types);
     
-    var abilities = get_abilities();
+    var abilities = get_abilities(natdex);
     console.log("Abilities!:");
     console.log(abilities);
     
@@ -240,7 +241,7 @@ function get_date_from_mush(mush) {
 
 //this should return an array with at least one variant.
 //let's not make Kanto default, I don't even like that.
-function get_variants(){
+function get_variants(natdex){
   //shoot, I'm looking in the wrong place. REMIX
   var ret = [];
   //Variants are in the 7th or maybe 8th dextable, in a farther table, in bold.
@@ -255,7 +256,7 @@ function get_variants(){
   if(variants.length > 0){
     console.log("Found some variants!");
     variants.each(function (i) {
-      ret.push(translate_form($(this).text().trim()));
+      ret.push(translate_form($(this).text().trim(), natdex));
     });
   } else {
     console.log("No variant types. Whew");
@@ -271,18 +272,31 @@ function get_variants(){
   return ret;
 }
 
-function translate_form(raw_form){
+function translate_form(raw_form, natdex){
   //let's get rid of some garbage
   raw_form = raw_form.replace(" Forme", "");
   raw_form = raw_form.replace(" Form", "");
   switch (raw_form){
     case "Alola" :
-      return "Alolan";
+    case "Alolan" :
+      if (natdex >= 722 && natdex <= 807 ){
+        return "Normal"
+      } else {
+        return "Alolan";
+      }
+      break;
+    case "Galarian" :
+      if (natdex >= 810 && natdex <= 890 ){
+        return "Normal"
+      } else {
+        return "Galarian";
+      }
       break;
     case "Kantonian" :
     case "Johtonian" :
     case "Hoennian" :
     case "Unovan" :
+    case "Kalosian" :
       return "Normal";
       break;
     default :
@@ -291,7 +305,7 @@ function translate_form(raw_form){
 }
 
 //could have plain types, or variant-based typing. gah.
-function get_types(){
+function get_types(natdex){
   var ret = [];
     //Same line as the name... and the only "cen" class td. Cool.
     var types = $("table.dextable").eq(1).find("tr").eq(1).children("td.cen").eq(0);
@@ -302,7 +316,7 @@ function get_types(){
       console.log("Found some variants!");
       var rows = variants.find("tr");
       rows.each(function (i) {
-        var variant = translate_form($(this).children('td').eq(0).text().trim());
+        var variant = translate_form($(this).children('td').eq(0).text().trim(), natdex);
         ret[variant] = get_types_from_links($(this).children('td').eq(1).children("a"));
       });
     } else {
@@ -324,7 +338,7 @@ function get_types_from_links(links){
 }
 
 //This is gonna get ugly.
-function get_abilities(){
+function get_abilities(natdex){
   var ret = [];
     var maybe_abilities = $("table.dextable").eq(2).find("tr").eq(1).find("b");
     
@@ -349,7 +363,7 @@ function get_abilities(){
           var new_form = maybe_ability.split(" ")[0];
           ret[variant] = build_me;
           build_me = {};
-          variant = translate_form(new_form);
+          variant = translate_form(new_form, natdex);
           return;
         }
         //If we're still here, it's just an ability. Enjoy it.
@@ -420,13 +434,17 @@ function get_stats(){
   var ret = [];
   var stat_anchor = $("a[name='stats']");
   //while the next sibling is a table.dextable, we have more stats.
-  
+  if (stat_anchor.length === 0){
+    console.log("Arceus town");
+    stat_anchor = $("a[name='legendsstats']");
+  }
   var checkme = stat_anchor.next();
   var go = true;
   while (go) {
     if (checkme.is("table") && checkme.hasClass("dextable")){
       //check for a form change, then grab dem numbers.
       var form_text = $(checkme).find("tr").eq(0).children("td").eq(0).text().trim();
+      form_text = form_text.replace("Click here for full details", "");
       if (form_text === "Stats"){
         form_text = normal_form;
       } else {
