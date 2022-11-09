@@ -297,6 +297,7 @@ function translate_form(raw_form, natdex){
     case "Hoennian" :
     case "Unovan" :
     case "Kalosian" :
+    case monster_name: //basically just doing this for Necrozma
       return "Normal";
       break;
     default :
@@ -360,7 +361,7 @@ function get_abilities(natdex){
           return;
         }
         if (maybe_ability.includes("Form Abilit") || maybe_ability.includes("Forme Abilit")){
-          var new_form = maybe_ability.split(" ")[0];
+          var new_form = maybe_ability.split(" Form")[0];
           ret[variant] = build_me;
           build_me = {};
           variant = translate_form(new_form, natdex);
