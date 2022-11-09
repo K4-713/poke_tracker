@@ -443,6 +443,10 @@ function get_stats(){
     stat_anchor = $("a[name='legendsstats']");
   }
   var checkme = stat_anchor.next();
+  if (checkme.length === 0){
+    //geeze. Pick a page format.
+    checkme = stat_anchor.parent().next();
+  }
   var go = true;
   while (go) {
     if (checkme.is("table") && checkme.hasClass("dextable")){

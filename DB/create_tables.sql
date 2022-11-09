@@ -20,7 +20,7 @@ CREATE TABLE mons (
   name varchar(32) NOT NULL,
   dex_national int(11) DEFAULT NULL,
   region varchar(16) DEFAULT NULL,
-  form varchar(16) DEFAULT NULL,
+  form varchar(32) DEFAULT NULL,
   type1 varchar(16) DEFAULT NULL,
   type2 varchar(16) DEFAULT NULL,
   ability1 varchar(32) DEFAULT NULL,
@@ -64,3 +64,6 @@ CREATE TABLE mons (
 --   unload BOOLEAN DEFAULT NULL,
 --   UNIQUE KEY neo_id (neo_id)
 -- );
+
+--altering a column:
+--ALTER TABLE mons MODIFY COLUMN form varchar(32) DEFAULT NULL

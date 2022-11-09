@@ -176,7 +176,7 @@ function get_table_composite_keys( $table ) {
       'mons' => array(
         'name' => 'varchar_32',
         'region' => 'varchar_16|null',
-        'form' => 'varchar_16|null',
+        'form' => 'varchar_32|null',
       )
   );
   if (array_key_exists($table, $composite_keys)){
@@ -215,7 +215,7 @@ function get_data_model_info($action) {
       'name' => 'varchar_32',
       'dex_national' => 'int',
       'region' => 'varchar_16|null',
-      'form' => 'varchar_16|null',
+      'form' => 'varchar_32|null',
       'type1' => 'varchar_16',
       'type2' => 'varchar_16|null',
       'ability1' => 'varchar_16',
