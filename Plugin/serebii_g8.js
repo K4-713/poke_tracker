@@ -256,7 +256,10 @@ function get_variants(natdex){
   if(variants.length > 0){
     console.log("Found some variants!");
     variants.each(function (i) {
-      ret.push(translate_form($(this).text().trim(), natdex));
+      var add_me_maybe = translate_form($(this).text().trim(), natdex);
+      if (ret.indexOf(add_me_maybe) === -1){ //unique it. #869
+        ret.push(add_me_maybe);
+      }
     });
   } else {
     console.log("No variant types. Whew");
