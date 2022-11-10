@@ -401,7 +401,7 @@ function get_next_number_link(number){
   console.log("Links?");
   console.log(links);
   for(var i=0; i<links.length; ++i){
-    if (links[i].innerHTML.includes("#"+(number+1))){
+    if (links[i].innerHTML.includes("#")){
       console.log("returning a link");
       links[i].innerHTML = links[i].innerHTML.replace("<br>", " - ");
       $(links[i]).css("color", "#000000");

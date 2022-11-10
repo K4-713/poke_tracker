@@ -251,19 +251,24 @@ function get_variants(natdex){
     console.log("Found some variants!");
     variants.each(function (i) {
       var add_me_maybe = translate_form($(this).text().trim(), natdex);
-      if (ret.indexOf(add_me_maybe) === -1){ //unique it. #869
+      if (ret.indexOf(add_me_maybe) === -1 && !add_me_maybe.includes(" Cap")){ //unique it. #869. Also fuck hats.
         ret.push(add_me_maybe);
       }
     });
   } else {
     console.log("No variant types. Whew");
-    ret.push('Normal');
   }
 
   //if there's no "Normal" in there, change the global synonym.
   if (!ret.includes("Normal")) {
     //again, this is basically a global.
+    if (!ret.length){
+      ret.push("Normal");
+    }
     normal_form = ret[0];
+    if (monster_name === "Zygarde"){
+      normal_form = "50%";
+    } 
   }
 
   return ret;
@@ -274,6 +279,7 @@ function translate_form(raw_form, natdex){
   raw_form = raw_form.replace(" Forme", "");
   raw_form = raw_form.replace(" Form", "");
   raw_form = raw_form.replace(" " + monster_name, ""); //647 problems
+  raw_form = raw_form.replace(monster_name + " ", ""); //720 problems
   switch (raw_form){
     case "Alola" :
     case "Alolan" :
@@ -473,13 +479,46 @@ function get_stats(){
     } else {
       go = false;
     }
+    ret = stat_form_correction(ret);
   }
   return ret;
 }
 
+function stat_form_correction(ret){
+  switch (monster_name){
+    case "Floette":
+      ret["Yellow Flower"] = ret["Red Flower"];
+      ret["Orange Flower"] = ret["Red Flower"];
+      ret["Blue Flower"] = ret["Red Flower"];
+      ret["White Flower"] = ret["Red Flower"];
+      break;
+    case "Minior":
+      ret["Red Core"] = ret["Cores"];
+      ret["Orange Core"] = ret["Cores"];
+      ret["Yellow Core"] = ret["Cores"];
+      ret["Green Core"] = ret["Cores"];
+      ret["Blue Core"] = ret["Cores"];
+      ret["Indigo Core"] = ret["Cores"];
+      ret["Violet Core"] = ret["Cores"];
+      break;
+    case "Rotom":
+      ret["Fan"] = ret["Alternates"];
+      ret["Frost"] = ret["Alternates"];
+      ret["Heat"] = ret["Alternates"];
+      ret["Mow"] = ret["Alternates"];
+      ret["Wash"] = ret["Alternates"];
+      break;
+  }
+  return ret;
+}
+
+
 function get_egg_group_string(){
   var ret = null;
   var egg_group_links = $("table.dextable").eq(4).find("tr").eq(1).children("td").eq(1).find("a");
+  if ( egg_group_links.eq(0).text().trim() === "") {
+    egg_group_links = $("table.dextable").eq(4).find("tr").eq(1).children("td").eq(2).find("a");
+  }
   egg_group_links.each(function(i){
     if(ret === null){
       ret = $(this).text().trim();
