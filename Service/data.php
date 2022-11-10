@@ -112,6 +112,7 @@ function handle_request($data) {
         return_result('failure', "Problem writing to the database");
       }
       break;
+    case 'g7_dex':
     case 'g8_dex':
       $insert_count = 0;
       $update_count = 0;
@@ -120,9 +121,9 @@ function handle_request($data) {
           $update = check_mon_exists($value['name'], @$value['region'], @$value['form']); //bite me: this is fine
           $temp_data[0] = $value;
           if($update){
-            $update_count += db_query('g8_dex', 'update', $temp_data );
+            $update_count += db_query($action, 'update', $temp_data );
           } else {
-            $insert_count += db_query('g8_dex', 'insert', $temp_data );
+            $insert_count += db_query($action, 'insert', $temp_data );
           }
         } else {
           return_result('failure', "No mon name received: " . print_r($value));
@@ -242,6 +243,33 @@ function get_data_model_info($action) {
   $model_info['g8_dex']['table'] = "mons";
   $model_info['g8_dex']['insert'] = query_build($model_info['g8_dex']['data'], 'insert', $model_info['g8_dex']['table']);
   $model_info['g8_dex']['update'] = query_build($model_info['g8_dex']['data'], 'update', $model_info['g8_dex']['table']);
+  
+  /** g7_dex **/
+  $model_info['g7_dex']['data'] = array(
+      'name' => 'varchar_32',
+      'dex_national' => 'int',
+      'region' => 'varchar_16|null',
+      'form' => 'varchar_32|null',
+      'type1' => 'varchar_16',
+      'type2' => 'varchar_16|null',
+      'ability1' => 'varchar_32',
+      'ability2' => 'varchar_32|null',
+      'ability_hidden' => 'varchar_32|null',
+      'b_att' => 'int',
+      'b_def' => 'int',
+      'b_hp' => 'int',
+      'b_sp_att' => 'int',
+      'b_sp_def' => 'int',
+      'b_speed' => 'int',
+      'female' => 'number|null',
+      'male' => 'number|null',
+      'egg_groups' => 'varchar_32|null',
+      'dex_alola_ultra' => 'int|null',
+      'catchable_usum' => 'bool|null',
+  );
+  $model_info['g7_dex']['table'] = "mons";
+  $model_info['g7_dex']['insert'] = query_build($model_info['g7_dex']['data'], 'insert', $model_info['g7_dex']['table']);
+  $model_info['g7_dex']['update'] = query_build($model_info['g7_dex']['data'], 'update', $model_info['g7_dex']['table']);
   
   /** tag_legends **/
   $model_info['tag_legends']['data'] = array(
