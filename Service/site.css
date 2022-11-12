@@ -42,6 +42,18 @@ table.structure { overflow-x: hidden; table-layout: fixed; border:0px; padding:0
 td { white-space:nowrap; border-bottom: 1px solid #bbbbbb; border-right: 1px dashed #bbbbbb }
 tr.header { background-color:#cccccc } 
 tr.header td { white-space:normal; font-weight:bold; }
+.box th {
+  border-bottom: 2px solid black; background-color: #ddf0ff; font-weight:bold; font-size: 22px; font-family:arial;
+}
+.box { border: 5px solid; margin-bottom:10px;}
+table.mon { font-size: 12px; font-family:arial; width: 170px; border: 3px solid; border-color:#777777 }
+table.box td { border: 1px solid; border-color:#559955 }
+table.mon td { border: 0px; }
+select.ability { padding:0px; width:160px;}
+td.dex { width:30px; text-align:right }
+td.check { width:30px; text-align:right }
+td.name {font-weight:bold; font-size:14px;}
+
 h1, h2 { font-family:Lato, sans-serif; margin-bottom:5px; }
 .left { float:left; clear:none }
 .right { float:right; clear:none }
@@ -89,13 +101,14 @@ path.total_sales_line { stroke: #773377 }
 
 
 .grey_out_image {
-    -webkit-filter: grayscale(100%);
-    filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
 }
 
 .opacity_50{
     opacity: 0.5;
 }
+
 
 /* D3 experiment */
 .sparkline {
