@@ -138,7 +138,17 @@ function img_char_to_variant(char){
 }
 
 function is_region(variant){
-  var regional_forms = ["Galarian", "Alolan", "Hisuian"];
+  var regional_forms = [
+    "Kantonian",
+    "Johtonian",
+    "Hoennian",
+    "Sinnoh",
+    "Unovan",
+    "Kalosian",
+    "Galarian",
+    "Alolan", "Alola",
+    "Hisuian"
+  ];
   return regional_forms.includes(variant);
 }
 
@@ -390,6 +400,50 @@ function expand_array(expand_me, keys) {
   
   return expand_me;
   
+}
+
+/**
+ * Trying to make compound forms suck less.
+ * Return the best fallback key to use for the key supplied.
+ * @param {string} variant - any variety of a variant key - could be region, form, or region|form
+ * @param {array} data_array
+ * @returns {undefined}
+ */
+function get_best_variant_fallback(variant, data_array){
+  //easy stuff first
+  if (data_array[variant]){
+    return variant;
+  } else {
+    console.log("Doing a variant fallback for " + variant + ", check the results!");
+  }
+  
+  //now what?
+  //The problem I'm actually having right now, is: In the case of compound variants,
+  //there are no abilities supplied for different forms - just the regions.
+  //Also the region can be "Normal".
+  if (variant.indexOf("|") !== -1){ //compound variant
+    var region = variant.split("|")[0];
+    if (data_array[region]){
+      return region;
+    }
+    var form = variant.split("|")[1];
+    if (data_array[form]){
+      return form;
+    }
+    //fuck it
+    if (data_array["Normal"]){
+      return "Normal";
+    }
+  } else {
+    //not compound, just... not there.
+    if (!is_region(variant)) { //probably a form
+      if (data_array["Normal"]){
+        return "Normal";
+      }
+    }
+  }
+  console.log("wtf? " + variant);
+  return "wtf";
 }
 
 function get_named_key_array_length(arrgh){

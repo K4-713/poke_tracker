@@ -73,7 +73,7 @@ $(document).ready(function () {
     console.log("Abilities!:");
     console.log(abilities);
     
-    var stats = get_stats();
+    var stats = get_stats(natdex);
     console.log("Stats:");
     console.log(stats);
     
@@ -94,19 +94,26 @@ $(document).ready(function () {
     var sendMe =[];
     
     for (var i in variants) { //all the sames first
-      //differentiating regions and forms is stupid.
-      var variant = (variants[i] !== 'Normal' ? variants[i] : null);
+      //handle it here, and pick the right stats to look at.
+      var variant = variants[i];
+      var region = is_region(variant) ? variant : null;
+      var form = !is_region(variant) ? variant : null;
+      if (variant.indexOf("|") !== -1){
+        console.log("AGH! COMPOUND FORM!");
+        region = variant.split("|")[0];
+        form = variant.split("|")[1];
+      }
       
       sendMe.push({
         name : monster_name,
         dex_national : dex_numbers['National'],
-        region : (is_region(variant) ? variant : null),
-        form : (!is_region(variant) ? variant : null),
+        region : (region !== 'Normal' ? region : null),
+        form : (form !== 'Normal' ? form : null),
         type1: (types[variants[i]].type1 || null),
         type2: (types[variants[i]].type2 || null),
-        ability1: (abilities[variants[i]].ability1 || null),
-        ability2: (abilities[variants[i]].ability2 || null),
-        ability_hidden: (abilities[variants[i]].ability_hidden || null),
+        ability1: (abilities[get_best_variant_fallback(variants[i], abilities)].ability1 || null),
+        ability2: (abilities[get_best_variant_fallback(variants[i], abilities)].ability2 || null),
+        ability_hidden: (abilities[get_best_variant_fallback(variants[i], abilities)].ability_hidden || null),
         b_hp : (stats[variants[i]].b_hp || null),
         b_att : (stats[variants[i]].b_att || null),
         b_def : (stats[variants[i]].b_def || null),
@@ -279,6 +286,7 @@ function translate_form(raw_form, natdex){
   //let's get rid of some garbage
   raw_form = raw_form.replace(" Forme", "");
   raw_form = raw_form.replace(" Form", "");
+  raw_form = raw_form.replace(" Standard Mode", "");
   switch (raw_form){
     case "Alola" :
     case "Alolan" :
@@ -300,11 +308,33 @@ function translate_form(raw_form, natdex){
     case "Hoennian" :
     case "Unovan" :
     case "Kalosian" :
-    case monster_name: //basically just doing this for Necrozma
+    case monster_name, "":
       return "Normal";
       break;
     default :
-      return raw_form;
+      //ugh, this is going to get nasty.
+      switch(natdex){
+        case 555:
+          //Compound form modes go region mode mode mode whatever.
+          //translate stripped region
+          var split = raw_form.split(" ");
+          if (!is_region(split[0])) {
+            return raw_form;
+          }
+          var ret_me = translate_form(split[0], natdex);
+          if (split.length > 1){
+            split.splice(0, 1);
+            if (ret_me === "Normal"){
+              ret_me = split.join(" ");
+            } else {
+              ret_me += "|" + split.join(" ");
+            }
+          }
+          return ret_me;
+          break;
+        default:
+          return raw_form;
+      }
   }
 }
 
@@ -319,9 +349,18 @@ function get_types(natdex){
     if(variants.length > 0){
       console.log("Found some variants!");
       var rows = variants.find("tr");
+      var last_variant = "";
       rows.each(function (i) {
         var variant = translate_form($(this).children('td').eq(0).text().trim(), natdex);
+        if (ret[variant]){ //already in there
+          switch (natdex) { //have to special catch those with compound region and form
+            case 555: //types go region, form, region, exact same form
+              variant = last_variant + "|" + variant;
+              break;
+          }
+        }
         ret[variant] = get_types_from_links($(this).children('td').eq(1).children("a"));
+        last_variant = variant;
       });
     } else {
       console.log("Single typing");
@@ -434,7 +473,7 @@ function get_gender_ratios(){
 }
 
 //Get stats
-function get_stats(){
+function get_stats(natdex){
   var ret = [];
   var stat_anchor = $("a[name='stats']");
   //while the next sibling is a table.dextable, we have more stats.
@@ -457,9 +496,8 @@ function get_stats(){
         form_text = normal_form;
       } else {
         form_text = form_text.replace("Stats - ", "");
-        form_text = form_text.replace("Forme", "Form");
-        form_text = form_text.replace(" Form", "");
         form_text = form_text.replace(" " + monster_name, "");
+        form_text = translate_form(form_text, natdex)
       }
       
       var stat_row = $(checkme).find("tr").eq(2);
@@ -475,6 +513,9 @@ function get_stats(){
       
       ret[form_text] = build_me;
       checkme = checkme.next();
+      if (checkme.is("div") && checkme.hasClass("radar-graph")){
+        checkme = checkme.next();
+      }
     } else {
       go = false;
     }
