@@ -60,13 +60,32 @@ CREATE TABLE mons (
   UNIQUE poke_unique (name, region, form)
 );
 
--- CREATE TABLE inventory (
---   neo_id int(11) DEFAULT NULL,
---   shop_qty int(11) DEFAULT NULL,
---   sdb_qty int(11) DEFAULT NULL,
---   unload BOOLEAN DEFAULT NULL,
---   UNIQUE KEY neo_id (neo_id)
--- );
+CREATE TABLE collections (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(32) NOT NULL,
+  location varchar(32) NOT NULL,
+  start_box int(11) DEFAULT NULL,
+  dex varchar(128) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE collection_mons (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  collection_id int(11) DEFAULT NULL,
+  mon_id int(11) DEFAULT NULL,
+  ball_id int(11) DEFAULT NULL,
+  ability varchar(32) DEFAULT NULL,
+  my_catch BOOLEAN DEFAULT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE balls (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(32) DEFAULT NULL,
+  image varchar(32) DEFAULT NULL,
+  tier int(11) DEFAULT NULL,
+  PRIMARY KEY (id)
+);
 
 --altering a column:
 --ALTER TABLE mons MODIFY COLUMN form varchar(32) DEFAULT NULL
