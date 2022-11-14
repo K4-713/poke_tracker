@@ -53,6 +53,9 @@ CREATE TABLE mons (
   catchable_swsh BOOLEAN DEFAULT NULL,
   catchable_bdsp BOOLEAN DEFAULT NULL,
   catchable_pla BOOLEAN DEFAULT NULL,
+  box_order int(11) DEFAULT NULL,
+  box_hide BOOLEAN DEFAULT NULL,
+  strong_dimorphism BOOLEAN DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE poke_unique (name, region, form)
 );
@@ -67,3 +70,6 @@ CREATE TABLE mons (
 
 --altering a column:
 --ALTER TABLE mons MODIFY COLUMN form varchar(32) DEFAULT NULL
+
+--adding a column:
+--ALTER TABLE mons ADD COLUMN strong_dimorphism BOOLEAN DEFAULT NULL;

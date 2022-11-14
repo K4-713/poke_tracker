@@ -23,7 +23,7 @@ start_page($title);
 
 $db = db_connect();
 
-$sql = "SELECT * from mons ORDER BY dex_national ASC, region DESC";
+$sql = "SELECT * from mons WHERE box_hide IS NOT true ORDER BY dex_national ASC, box_order ASC, region ASC, form ASC";
 $result = $db->query($sql);
 
 echo ($result->num_rows . " monsters retrieved <br>");
@@ -35,36 +35,46 @@ $box_row = 0;
 $box_column = 0;
 
 while ($row = $result->fetch_assoc()) {
-  if ($box_row === 0 && $box_column === 0){
-    //start a new box
-    echo "<table class='box'>\n";
-    echo "<tr><th colspan='6'>Box $box</th></tr>\n";
-  }
-  if($box_column === 0){
-    echo "<tr>";
+  $rows = 1;
+  $extra_forms = [];
+  if ($row['strong_dimorphism'] == true){
+    $rows = 2;
+    $extra_forms = ['Male', 'Female'];
   }
   
-  echo "<td>" . add_monster_in_box($row) . "</td>";
-  
-  if($box_column === 5){
-    echo "</tr>\n";
-  }
-  if ($box_row === 4 && $box_column === 5){
-    //end the box
-    echo "</table>\n";
-    $box += 1;
-    $box_row = 0;
-    $box_column = 0;
-  } else if($box_column === 5){
-    $box_row += 1;
-    $box_column = 0;
-  } else {
-    $box_column += 1;
+  while ($rows > 0) {
+    if ($box_row === 0 && $box_column === 0){
+      //start a new box
+      echo "<table class='box'>\n";
+      echo "<tr><th colspan='6'>Box $box</th></tr>\n";
+    }
+    if($box_column === 0){
+      echo "<tr>";
+    }
+    
+    echo "<td>" . add_monster_in_box($row, array_pop($extra_forms)) . "</td>";
+
+    if($box_column === 5){
+      echo "</tr>\n";
+    }
+    if ($box_row === 4 && $box_column === 5){
+      //end the box
+      echo "</table>\n";
+      $box += 1;
+      $box_row = 0;
+      $box_column = 0;
+    } else if($box_column === 5){
+      $box_row += 1;
+      $box_column = 0;
+    } else {
+      $box_column += 1;
+    }
+    $rows -= 1;
   }
   
 }
 
-function add_monster_in_box($row){
+function add_monster_in_box($row, $extra_form = false){
   $add_mon = "<table class=mon>";
   
   $rf_string = "";
@@ -76,6 +86,12 @@ function add_monster_in_box($row){
       $rf_string .= ", ";
     }
     $rf_string .= $row['form'];
+  }
+  if ($extra_form) {
+    if ($rf_string != ""){
+      $rf_string .= " ";
+    }
+    $rf_string .= ($extra_form);
   }
   if ($rf_string === ""){
     $rf_string = "&nbsp";
