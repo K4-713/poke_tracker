@@ -25,10 +25,7 @@ $db = db_connect();
 
 $sql = "SELECT * from mons WHERE box_hide IS NOT true ORDER BY dex_national ASC, box_order ASC, region ASC, form ASC";
 $result = $db->query($sql);
-
 echo ($result->num_rows . " monsters retrieved <br>");
-
-$report = array();
 
 $box = 1 + @$_GET['offset'];
 $box_row = 0;
@@ -75,7 +72,8 @@ while ($row = $result->fetch_assoc()) {
 }
 
 function add_monster_in_box($row, $extra_form = false){
-  $add_mon = "<table class=mon>";
+  $add_mon = "<form name='" . $row['id'] . "'>";
+  $add_mon = "<input type='hidden' name='mon_id' value='" . $row['id'] . "'><table class=mon>";
   
   $rf_string = "";
   if ($row['region']) {
@@ -104,16 +102,17 @@ function add_monster_in_box($row, $extra_form = false){
     $namestring .= "<img class='inline' src='./Images/Icons/Myth.gif'>";
   }
   
-  $add_mon .= "<tr><td class='name'>$namestring</td>";
+  $add_mon .= "<tr><td class='check'><input type='checkbox' class='cbo'></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
-  $add_mon .= "<tr><td class='region_form'>" . $rf_string . "</td>";
-  $add_mon .= "<td class='check'><input type='checkbox' class='cbo'></td></tr>\n";
+  $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
+  $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd() . "</td></tr>\n";
   
   $types_out = get_poketype_output($row['type1']);
   if (!is_null($row['type2'])){
     $types_out .= get_poketype_output($row['type2']);
   }
-  $add_mon .= "<tr><td class='types' colspan=2>" . $types_out . "</td></tr>\n";
+  $add_mon .= "<tr><td class='types' colspan=3>" . $types_out . "</td>";
+  $add_mon .= "<td class='check'><input type='checkbox' class='cbo'></td></tr>\n";
   
   $ability_dd = "<select name='ability' id='ability' class='ability'>\n";
   $ability_dd .= "<option value=''> - </option>\n";
@@ -126,10 +125,34 @@ function add_monster_in_box($row, $extra_form = false){
   }
   $ability_dd .= "</select>\n"; 
   
-  $add_mon .= "<tr colspan=2><td class = 'ability'>" . $ability_dd . "</td></tr>\n";
+  $add_mon .= "<tr colspan=4><td class = 'ability'>" . $ability_dd . "</td></tr>\n";
   
   $add_mon .= "</td></tr>";
   
-  $add_mon .= "</table>\n";
+  $add_mon .= "</table></form>\n";
   return $add_mon;
+}
+
+function get_ball_dd($selected = null){
+  static $balls = null;
+  if (!is_array($balls)){
+    $db = db_connect();
+    $sql = "SELECT * from balls ORDER BY tier ASC";
+    $result_balls = $db->query($sql);
+    while ($row = $result_balls->fetch_assoc()) {
+      $balls[] = $row;
+    }
+  }
+  
+  $ball_dd = "<select name='ball' id='ball' class='ball'>\n";
+  $ball_dd .= "<option value=''> - </option>\n";
+  foreach ($balls as $ball){
+    if ($selected && $selected = $ball['name']){
+      $ball_dd .= "<option value=" . $ball['name'] ." selected>" . $ball['image'] . "</option>\n";
+    } else {
+      $ball_dd .= "<option value=" . $ball['name'] .">" . $ball['name'] . "</option>\n";
+    }
+  }
+  $ball_dd .= "</select>\n";
+  return $ball_dd;
 }
