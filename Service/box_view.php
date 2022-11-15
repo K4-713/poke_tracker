@@ -72,8 +72,8 @@ while ($row = $result->fetch_assoc()) {
 }
 
 function add_monster_in_box($row, $extra_form = false){
-  $add_mon = "<form name='" . $row['id'] . "'>";
-  $add_mon = "<input type='hidden' name='mon_id' value='" . $row['id'] . "'><table class=mon>";
+  $add_mon = "<form id='" . $row['id'] . "' name='" . $row['id'] . "'>";
+  $add_mon .= "<input type='hidden' name='mon_id' value='" . $row['id'] . "'><table class=mon>";
   
   $rf_string = "";
   if ($row['region']) {
