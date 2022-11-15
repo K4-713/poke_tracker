@@ -76,6 +76,7 @@ CREATE TABLE collection_mons (
   ball_id int(11) DEFAULT NULL,
   ability varchar(32) DEFAULT NULL,
   my_catch BOOLEAN DEFAULT NULL,
+  extra_form varchar(16) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -88,7 +89,7 @@ CREATE TABLE balls (
 );
 
 --altering a column:
---ALTER TABLE mons MODIFY COLUMN form varchar(32) DEFAULT NULL
+--ALTER TABLE mons MODIFY COLUMN form varchar(32) DEFAULT NULL;
 
 --adding a column:
---ALTER TABLE mons ADD COLUMN strong_dimorphism BOOLEAN DEFAULT NULL;
+--ALTER TABLE collection_mons ADD COLUMN  extra_form varchar(16) DEFAULT NULL;

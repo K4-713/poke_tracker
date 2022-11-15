@@ -23,11 +23,16 @@ start_page($title);
 
 $db = db_connect();
 
+$sql = "SELECT * from collections WHERE name = 'National Living Dex'";
+$res_collection = $db->query($sql);
+$collection_info = $res_collection->fetch_assoc();
+echo $collection_info['name'] . ", " . $collection_info['location'];
+
 $sql = "SELECT * from mons WHERE box_hide IS NOT true ORDER BY dex_national ASC, box_order ASC, region ASC, form ASC";
 $result = $db->query($sql);
 echo ($result->num_rows . " monsters retrieved <br>");
 
-$box = 1 + @$_GET['offset'];
+$box = $collection_info['start_box'];
 $box_row = 0;
 $box_column = 0;
 
@@ -73,7 +78,9 @@ while ($row = $result->fetch_assoc()) {
 
 function add_monster_in_box($row, $extra_form = false){
   $add_mon = "<form id='" . $row['id'] . "' name='" . $row['id'] . "'>";
-  $add_mon .= "<input type='hidden' name='mon_id' value='" . $row['id'] . "'><table class=mon>";
+  $add_mon .= "<input type='hidden' name='mon_id' id='mon_id' value='" . $row['id'] . "'>";
+  $add_mon .= "<input type='hidden' name='extra_form' id='extra_form' value='" . $extra_form . "'>";
+  $add_mon .= "<table class=mon>";
   
   $rf_string = "";
   if ($row['region']) {
@@ -102,7 +109,7 @@ function add_monster_in_box($row, $extra_form = false){
     $namestring .= "<img class='inline' src='./Images/Icons/Myth.gif'>";
   }
   
-  $add_mon .= "<tr><td class='check'><input type='checkbox' class='cbo'></td><td class='name' colspan=2>$namestring</td>";
+  $add_mon .= "<tr><td class='check'><input type='checkbox' class='cbo' onClick=\"poke_toggle('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
   $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
   $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd() . "</td></tr>\n";
@@ -138,6 +145,30 @@ function get_ball_dd($selected = null){
   if (!is_array($balls)){
     $db = db_connect();
     $sql = "SELECT * from balls ORDER BY tier ASC";
+    $result_balls = $db->query($sql);
+    while ($row = $result_balls->fetch_assoc()) {
+      $balls[] = $row;
+    }
+  }
+  
+  $ball_dd = "<select name='ball' id='ball' class='ball'>\n";
+  $ball_dd .= "<option value=''> - </option>\n";
+  foreach ($balls as $ball){
+    if ($selected && $selected = $ball['name']){
+      $ball_dd .= "<option value=" . $ball['name'] ." selected>" . $ball['image'] . "</option>\n";
+    } else {
+      $ball_dd .= "<option value=" . $ball['name'] .">" . $ball['name'] . "</option>\n";
+    }
+  }
+  $ball_dd .= "</select>\n";
+  return $ball_dd;
+}
+
+function get_collection_mon_id($row){
+  static $collection_mons = null;
+  if (!is_array($collection_mons)){
+    $db = db_connect();
+    $sql = "SELECT * from collection_mons where collection_id = 1";
     $result_balls = $db->query($sql);
     while ($row = $result_balls->fetch_assoc()) {
       $balls[] = $row;

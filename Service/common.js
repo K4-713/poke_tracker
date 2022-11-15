@@ -95,3 +95,24 @@ function get_shop_qty(neo_id) {
     var div_id = "#" + neo_id + "_shop_qty";
     return parseInt($(div_id).text());
 }
+
+function test_ajax(action, rows, success_callback = false){
+  var what_i_got = "Action: " + action + "\nRows: " + JSON.stringify(rows);
+  window.alert(what_i_got);
+}
+
+function poke_toggle(action, elem){
+  var form = $(elem).closest("form");
+  var backend_action = "toggle_collection_owned";
+  var sendme = {};
+  switch(action){
+    case "owned":
+      window.alert("Yep, owned");
+      sendme = {
+        'mon_id' : $(form).find("input#mon_id").attr("value"),
+        'extra_form' : $(form).find("input#extra_form").attr("value"),
+      };
+      break;
+  }
+  test_ajax(backend_action, sendme);
+}
