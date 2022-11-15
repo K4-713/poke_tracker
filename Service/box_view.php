@@ -26,7 +26,7 @@ $db = db_connect();
 $sql = "SELECT * from collections WHERE name = 'National Living Dex'";
 $res_collection = $db->query($sql);
 $collection_info = $res_collection->fetch_assoc();
-echo $collection_info['name'] . ", " . $collection_info['location'];
+echo $collection_info['name'] . ", " . $collection_info['location'] . "<br>";
 
 $sql = "SELECT * from mons WHERE box_hide IS NOT true ORDER BY dex_national ASC, box_order ASC, region ASC, form ASC";
 $result = $db->query($sql);
@@ -116,7 +116,7 @@ function add_monster_in_box($row, $extra_form = false){
   if (is_array($collected)){
     $checked = "checked";
   }
-  $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_toggle('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
+  $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_update('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
   $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
   $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd() . "</td></tr>\n";
@@ -130,7 +130,7 @@ function add_monster_in_box($row, $extra_form = false){
   if (is_array($collected) && $collected['my_catch'] === true){
     $checked = "checked";
   }
-  $add_mon .= "<td class='check'><input type='checkbox' $checked class='cbo' name='my_catch' id='my_catch'></td></tr>\n";
+  $add_mon .= "<td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_update('my_catch', this);\" name='my_catch' id='my_catch'></td></tr>\n";
   
   $ability_dd = "<select name='ability' id='ability' class='ability'>\n";
   $ability_dd .= "<option value=''> - </option>\n";

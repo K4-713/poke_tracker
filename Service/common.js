@@ -101,7 +101,7 @@ function test_ajax(action, rows, success_callback = false){
   window.alert(what_i_got);
 }
 
-function poke_toggle(action, elem){
+function poke_update(action, elem){
   var form = $(elem).closest("form");
   var backend_action = "toggle_collection_owned";
   var sendme = {};
@@ -113,7 +113,7 @@ function poke_toggle(action, elem){
         'extra_form' : $(form).find("input#extra_form").attr("value"),
       };
       break;
-    case "mine":
+    case "my_catch":
       backend_action = "toggle_collection_mine";
       sendme = {
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value")
