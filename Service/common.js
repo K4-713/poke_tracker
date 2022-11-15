@@ -107,10 +107,16 @@ function poke_toggle(action, elem){
   var sendme = {};
   switch(action){
     case "owned":
-      window.alert("Yep, owned");
+      backend_action = "toggle_collection_owned";
       sendme = {
         'mon_id' : $(form).find("input#mon_id").attr("value"),
         'extra_form' : $(form).find("input#extra_form").attr("value"),
+      };
+      break;
+    case "mine":
+      backend_action = "toggle_collection_mine";
+      sendme = {
+        'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value")
       };
       break;
   }

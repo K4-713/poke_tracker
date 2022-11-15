@@ -80,6 +80,10 @@ function add_monster_in_box($row, $extra_form = false){
   $add_mon = "<form id='" . $row['id'] . "' name='" . $row['id'] . "'>";
   $add_mon .= "<input type='hidden' name='mon_id' id='mon_id' value='" . $row['id'] . "'>";
   $add_mon .= "<input type='hidden' name='extra_form' id='extra_form' value='" . $extra_form . "'>";
+  $collected = is_collected($row['id'], $extra_form);
+  if (is_array($collected)){
+    $add_mon .= "<input type='hidden' name='collection_mons_id' id='collection_mons_id' value='" . $collected['id'] . "'>";
+  }
   $add_mon .= "<table class=mon>";
   
   $rf_string = "";
@@ -108,8 +112,11 @@ function add_monster_in_box($row, $extra_form = false){
   if ($row['mythical'] === '1') {
     $namestring .= "<img class='inline' src='./Images/Icons/Myth.gif'>";
   }
-  
-  $add_mon .= "<tr><td class='check'><input type='checkbox' class='cbo' onClick=\"poke_toggle('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
+  $checked = "";
+  if (is_array($collected)){
+    $checked = "checked";
+  }
+  $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_toggle('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
   $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
   $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd() . "</td></tr>\n";
@@ -119,7 +126,11 @@ function add_monster_in_box($row, $extra_form = false){
     $types_out .= get_poketype_output($row['type2']);
   }
   $add_mon .= "<tr><td class='types' colspan=3>" . $types_out . "</td>";
-  $add_mon .= "<td class='check'><input type='checkbox' class='cbo'></td></tr>\n";
+  $checked = "";
+  if (is_array($collected) && $collected['my_catch'] === true){
+    $checked = "checked";
+  }
+  $add_mon .= "<td class='check'><input type='checkbox' $checked class='cbo' name='my_catch' id='my_catch'></td></tr>\n";
   
   $ability_dd = "<select name='ability' id='ability' class='ability'>\n";
   $ability_dd .= "<option value=''> - </option>\n";
@@ -186,4 +197,22 @@ function get_collection_mon_id($row){
   }
   $ball_dd .= "</select>\n";
   return $ball_dd;
+}
+
+function is_collected($id, $extra_form){
+  static $collected = null;
+  if (!is_array($collected)){
+    $db = db_connect();
+    $sql = "SELECT * from collection_mons WHERE collection_id = 1"; //TODO: a dynamic.
+    $result_collected = $db->query($sql);
+    while ($row = $result_collected->fetch_assoc()) {
+      $collected[] = $row;
+    }
+  }
+  foreach ($collected as $row){
+    if (($row['mon_id'] === $id) && ($row['extra_types'] === $extra_form)){
+      return $row;
+    }
+  }
+  return false;
 }
