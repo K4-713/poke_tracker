@@ -132,7 +132,7 @@ function add_monster_in_box($row, $extra_form = false){
   }
   $add_mon .= "<td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_update('my_catch', this);\" name='my_catch' id='my_catch'></td></tr>\n";
   
-  $ability_dd = "<select name='ability' id='ability' class='ability'>\n";
+  $ability_dd = "<select name='ability' id='ability' class='ability' onChange=\"poke_update('ability', this);\">\n";
   $ability_dd .= "<option value=''> - </option>\n";
   $ability_dd .= "<option value='" . $row['ability1'] . "'>" . $row['ability1'] . "</option>\n";
   if (!is_null($row['ability2'])){
@@ -162,7 +162,7 @@ function get_ball_dd($selected = null){
     }
   }
   
-  $ball_dd = "<select name='ball' id='ball' class='ball'>\n";
+  $ball_dd = "<select name='ball' id='ball' class='ball' onChange=\"poke_update('ball', this);\">\n";
   $ball_dd .= "<option value=''> - </option>\n";
   foreach ($balls as $ball){
     if ($selected && $selected = $ball['name']){
@@ -186,17 +186,7 @@ function get_collection_mon_id($row){
     }
   }
   
-  $ball_dd = "<select name='ball' id='ball' class='ball'>\n";
-  $ball_dd .= "<option value=''> - </option>\n";
-  foreach ($balls as $ball){
-    if ($selected && $selected = $ball['name']){
-      $ball_dd .= "<option value=" . $ball['name'] ." selected>" . $ball['image'] . "</option>\n";
-    } else {
-      $ball_dd .= "<option value=" . $ball['name'] .">" . $ball['name'] . "</option>\n";
-    }
-  }
-  $ball_dd .= "</select>\n";
-  return $ball_dd;
+  //TODO: Stuff
 }
 
 function is_collected($id, $extra_form){

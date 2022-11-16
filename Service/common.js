@@ -119,6 +119,20 @@ function poke_update(action, elem){
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value")
       };
       break;
+    case "ability":
+      backend_action = "set_collection_ability";
+      sendme = {
+        'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
+        'ability' : $(form).find("select#ability").val(),
+      };
+      break;
+    case "ball":
+      backend_action = "set_collection_ball";
+      sendme = {
+        'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
+        'ball' : $(form).find("select#ball").val(),
+      };
+      break;
   }
   test_ajax(backend_action, sendme);
 }
