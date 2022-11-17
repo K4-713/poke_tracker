@@ -113,12 +113,14 @@ function poke_update(action, elem){
         'extra_form' : $(form).find("input#extra_form").attr("value"),
         'collection_id' : $('input#collection_id').attr("value"),
       };
+      $(elem).prop("disabled", true);
       break;
     case "my_catch":
       backend_action = "toggle_collection_mine";
       sendme = {
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value")
       };
+      $(elem).prop("disabled", true);
       break;
     case "ability":
       backend_action = "set_collection_ability";
@@ -126,6 +128,7 @@ function poke_update(action, elem){
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
         'ability' : $(form).find("select#ability").val(),
       };
+      $(elem).prop("disabled", true);
       break;
     case "ball":
       backend_action = "set_collection_ball";
@@ -133,6 +136,7 @@ function poke_update(action, elem){
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
         'ball' : $(form).find("select#ball").val(),
       };
+      $(elem).prop("disabled", true);
       break;
   }
   test_ajax(backend_action, sendme);
