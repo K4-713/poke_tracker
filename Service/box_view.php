@@ -20,6 +20,7 @@
 require_once('common.php');
 $title = "Box View";
 start_page($title);
+poke_auth_key();
 
 $db = db_connect();
 

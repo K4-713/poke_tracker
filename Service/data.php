@@ -150,13 +150,33 @@ function handle_request($data) {
         return_result('failure', "Problem writing to the database");
       }
       break;
+    case 'toggle_collection_owned':
+      if (sizeof($data['rows']) !== 1){
+        return_result('failure', "Weird: Expected one row, got " . sizeof($data['rows']));
+      }
+      $exists = check_collection_mon_exists($data['rows'][0]['mon_id'], $data['rows'][0]['collection_id'], $data['rows'][0]['form_extras_id']);
+      $did = "";
+      $rowcount = "";
+      if ($exists) {
+        $rowcount = db_query($action, 'delete', $data['rows'] );
+        $did = "Deleted";
+      } else {
+        $rowcount = db_query($action, 'insert', $data['rows'] );
+        $did = "Inserted";
+      }
+      if ($rowcount > 0) {
+        return_result('success', "$did: $rowcount row(s)");
+      } else {
+        return_result('failure', "$did 0 rows");
+      }
+      break;
     default:
       return_result('failure', "Invalid action '$action'");
   }
 }
 
 //temp until I can get all of them moved over.
-function validate_data($action, $data) {
+function validate_data($action, $data) {  
   $expected_data = get_expected_data($action);
   if ($expected_data) {
     return validate($data, $expected_data);
@@ -167,7 +187,7 @@ function validate_data($action, $data) {
 function get_expected_data($action) {
     $dmi = get_data_model_info($action);
     if (is_array($dmi) && array_key_exists('data', $dmi)) {
-	return $dmi['data'];
+      return $dmi['data'];
     }
     return false;
 }
@@ -293,6 +313,17 @@ function get_data_model_info($action) {
         'name' => 'varchar_32'
       )
   );
+  
+  /** Collection Manipulation **/
+  $model_info['toggle_collection_owned']['data'] = array(
+      'mon_id' => 'int',
+      'collection_id' => 'int',
+      'form_extras' => 'varchar_16|null'
+  );
+  $model_info['toggle_collection_owned']['table'] = "collection_mons";
+  $model_info['toggle_collection_owned']['insert'] = query_build($model_info['toggle_collection_owned']['data'], 'insert', $model_info['toggle_collection_owned']['table']);
+  $model_info['toggle_collection_owned']['delete'] = query_build($model_info['toggle_collection_owned']['data'], 'delete', $model_info['toggle_collection_owned']['table']);
+  
   //and finally return
   if (array_key_exists($action, $model_info)) {
     return $model_info[$action];
@@ -430,9 +461,14 @@ function query_build($structure, $query_type, $table) {
           unset($set_data[$key]);
         }
       }
-      $query['query'] .= "SET " . query_build_setwhere_fields($set_data) . ' ';
-      $query['query'] .= "WHERE " . query_build_setwhere_fields($composite_keys, true);
+      $query['query'] .= "SET " . query_build_set_fields($set_data) . ' ';
+      $query['query'] .= "WHERE " . query_build_where_fields($composite_keys);
       $query['binding'] = query_get_binding_string(array_merge($set_data, $composite_keys));
+      break;
+    case 'delete' :
+      $query['query'] = "DELETE FROM $table ";
+      $query['query'] .= "WHERE " . query_build_where_fields($structure);
+      $query['binding'] = query_get_binding_string($structure);
       break;
     default :
       return_result('failure', "Invalid query type '$query_type'");
@@ -445,21 +481,30 @@ function query_build_insert_fields($structure) {
   return "($fields)";
 }
 
-function query_build_setwhere_fields($structure, $where=false) {
+function query_build_set_fields($structure) {
   //for use in update statements.
   $comparator = " = ?";
-  if ($where) {
-    //SPACESHIP
-    $comparator = " <=> ?";
-  }
   foreach($structure as $key => $value){
     $structure[$key] = $key . $comparator;
   }
-  if ($where) {
-    $fields = implode(' AND ', $structure);
-  } else {
-    $fields = implode(', ', $structure);
+  $fields = implode(', ', $structure);
+  return $fields;
+}
+
+function query_build_where_fields($structure) {
+  //for use in update statements.
+  $comparator = " = ?";
+  //SPACESHIP - Is for comparing nulls correctly.
+  $spaceship = " <=> ?";
+  foreach($structure as $key => $value){
+    //if $value is nullable, use the spaceship! whee 
+    if (strpos($value, '|null') > 0) {
+      $structure[$key] = $key . $spaceship;
+    } else {
+      $structure[$key] = $key . $comparator;
+    }
   }
+  $fields = implode(' AND ', $structure);
   return $fields;
 }
 
@@ -637,6 +682,20 @@ function check_mon_exists($name, $region = null, $form = null){
   $query .= " name " . format_raw_query_equivalence($name); 
   $query .= " AND region " . format_raw_query_equivalence($region);
   $query .= " AND form " . format_raw_query_equivalence($form);
+  $count = db_raw_query($query);
+  
+  if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function check_collection_mon_exists($mon_id, $collection_id, $form_extras){
+  $query = "SELECT count(*) as count from collection_mons where";
+  $query .= " mon_id " . format_raw_query_equivalence($mon_id); 
+  $query .= " AND collection_id " . format_raw_query_equivalence($collection_id);
+  $query .= " AND form_extras " . format_raw_query_equivalence($form_extras);
   $count = db_raw_query($query);
   
   if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){

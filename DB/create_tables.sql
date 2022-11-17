@@ -76,7 +76,7 @@ CREATE TABLE collection_mons (
   ball_id int(11) DEFAULT NULL,
   ability varchar(32) DEFAULT NULL,
   my_catch BOOLEAN DEFAULT NULL,
-  extra_form varchar(16) DEFAULT NULL,
+  form_extras varchar(16) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -92,4 +92,5 @@ CREATE TABLE balls (
 --ALTER TABLE mons MODIFY COLUMN form varchar(32) DEFAULT NULL;
 
 --adding a column:
---ALTER TABLE collection_mons ADD COLUMN  extra_form varchar(16) DEFAULT NULL;
+--ALTER TABLE collection_mons ADD COLUMN form_extras varchar(16) DEFAULT NULL;
+--ALTER TABLE collection_mons DROP COLUMN extra_form;

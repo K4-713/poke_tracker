@@ -104,40 +104,40 @@ function test_ajax(action, rows, success_callback = false){
 function poke_update(action, elem){
   var form = $(elem).closest("form");
   var backend_action = "toggle_collection_owned";
-  var sendme = {};
+  var sendme = [];
   switch(action){
     case "owned":
       backend_action = "toggle_collection_owned";
-      sendme = {
+      sendme.push({
         'mon_id' : $(form).find("input#mon_id").attr("value"),
         'extra_form' : $(form).find("input#extra_form").attr("value"),
         'collection_id' : $('input#collection_id').attr("value"),
-      };
+      });
       $(elem).prop("disabled", true);
       break;
     case "my_catch":
       backend_action = "toggle_collection_mine";
-      sendme = {
+      sendme.push({
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value")
-      };
+      });
       $(elem).prop("disabled", true);
       break;
     case "ability":
       backend_action = "set_collection_ability";
-      sendme = {
+      sendme.push({
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
         'ability' : $(form).find("select#ability").val(),
-      };
+      });
       $(elem).prop("disabled", true);
       break;
     case "ball":
       backend_action = "set_collection_ball";
-      sendme = {
+      sendme.push({
         'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
         'ball' : $(form).find("select#ball").val(),
-      };
+      });
       $(elem).prop("disabled", true);
       break;
   }
-  test_ajax(backend_action, sendme);
+  do_ajax(backend_action, sendme);
 }

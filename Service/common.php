@@ -35,29 +35,29 @@ function db_connect() {
     return $db;
 }
 
-function validate($data, $expected_structure) {
-    foreach ($data as $row => $columns) {
-	//check to see that everything we expect is here, in every row
-        foreach ($expected_structure as $field => $type) {
-            if (!array_key_exists($field, $data[$row])) {
-                if (strpos($type, '|null') > 0) {
-                    $data[$row][$field] = NULL;
-                } else {
-                    error_log("Data failed to validate - Missing '$field' field in row '$row");
-                    error_log(print_r($data, true));
-                    return false;
-                }
-            }
+function validate($data, $expected_structure) {  
+  foreach ($data as $row => $columns) {
+    //check to see that everything we expect is here, in every row
+    foreach ($expected_structure as $field => $type) {
+      if (!array_key_exists($field, $data[$row])) {
+        if (strpos($type, '|null') > 0) {
+          $data[$row][$field] = NULL;
+        } else {
+          error_log("Data failed to validate - Missing '$field' field in row '$row");
+          error_log(print_r($data, true));
+          return false;
         }
+      }
+    }
 
-//make sure the data types are legit
-	foreach ($columns as $column => $value) {
+    //make sure the data types are legit
+    foreach ($columns as $column => $value) {
 	    //skip data we aren't going to process anyway
 	    if (!array_key_exists($column, $expected_structure)) {
-		if ($column !== 'ts') { //yeah, we know about these.
-		    error_log(__FUNCTION__ . ": Extra key '$column'");
-		}
-		continue;
+        if ($column !== 'ts') { //yeah, we know about these.
+            error_log(__FUNCTION__ . ": Extra key '$column'");
+        }
+        continue;
 	    }
 
 	    //now I have the concept of '|null' types...
@@ -65,67 +65,66 @@ function validate($data, $expected_structure) {
 	    $null_ok = false;
 	    $validated = false;
 	    if (is_array($base_type)) {
-		//can't solve this with recursion, but this looks like a refactor coming.
-		//first thing's first, though: Test to see if we have an array where we expect one.
-		$structure = $base_type;
-		if (!is_array($value)) {
-		    error_log(__FUNCTION__ . ": $value expected to be an array.");
-		    return false;
-		}
+        //can't solve this with recursion, but this looks like a refactor coming.
+        //first thing's first, though: Test to see if we have an array where we expect one.
+        $structure = $base_type;
+        if (!is_array($value)) {
+            error_log(__FUNCTION__ . ": $value expected to be an array.");
+            return false;
+        }
 
-		//for each item in the incoming array, make sure it's in the structure
-		foreach ($value as $sub_index => $sub_row) {
-		    foreach ($sub_row as $subkey => $subvalue) {
-			if (!array_key_exists($subkey, $structure)) {
-			    error_log(__FUNCTION__ . ": $subkey not present in $column array");
-			    return false;
-			}
-		    }
-		}
+        //for each item in the incoming array, make sure it's in the structure
+        foreach ($value as $sub_index => $sub_row) {
+          foreach ($sub_row as $subkey => $subvalue) {
+            if (!array_key_exists($subkey, $structure)) {
+              error_log(__FUNCTION__ . ": $subkey not present in $column array");
+              return false;
+            }
+          }
+        }
 
-		//for each item in the structure, make sure it's there and it validates.
-		//NOTE: This will *pass* for empty arrays.
-		foreach ($structure as $subcolumn => $subtype) {
-		    $base_type = $subtype;
-		    if (strpos($subtype, '|null') > 0) {
-			$null_ok = true;
-			$base_type = explode('|', $subtype);
-			$base_type = $base_type[0];
-		    }
+        //for each item in the structure, make sure it's there and it validates.
+        //NOTE: This will *pass* for empty arrays.
+        foreach ($structure as $subcolumn => $subtype) {
+          $base_type = $subtype;
+          if (strpos($subtype, '|null') > 0) {
+            $null_ok = true;
+            $base_type = explode('|', $subtype);
+            $base_type = $base_type[0];
+          }
 
-		    $validate_function = 'check_' . $base_type;
-		    $validated = true; //ugh, this is just stinky...
-		    foreach ($value as $sub_index => $sub_row) {
-			//And Equals, I guess.
-			$validated &= $validate_function($value[$sub_index][$subcolumn]);
-		    }
-		}
-	    } else {
-		if (strpos($base_type, '|null') > 0) {
-		    $null_ok = true;
-		    $base_type = explode('|', $base_type);
-		    $base_type = $base_type[0];
-		}
+          $validate_function = 'check_' . $base_type;
+          $validated = true; //ugh, this is just stinky...
+          foreach ($value as $sub_index => $sub_row) {
+            //And Equals, I guess.
+            $validated &= $validate_function($value[$sub_index][$subcolumn]);
+          }
+        }
+      } else {
+        if (strpos($base_type, '|null') > 0) {
+            $null_ok = true;
+            $base_type = explode('|', $base_type);
+            $base_type = $base_type[0];
+        }
 
-		$validate_function = 'check_' . $base_type;
-		$validated = $validate_function($value);
+        $validate_function = 'check_' . $base_type;
+        $validated = $validate_function($value);
 	    }
 
 	    if (!$validated && $null_ok && is_null($value)) {
-		$validated = true;
+        $validated = true;
 	    }
 
 	    if (!$validated) {
-		if (is_array($value)) {
-		    $value = "Array";
-		}
-		error_log("Validation failure at '$validate_function' for '$value' ");
-		return false;
+        if (is_array($value)) {
+          $value = "Array";
+        }
+        error_log("Validation failure at '$validate_function' for '$value' ");
+        return false;
 	    }
-	}
     }
-
-    return true;
+  }
+  return true;
 }
 
 function check_date($value) {
