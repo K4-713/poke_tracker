@@ -36,6 +36,8 @@ $box = $collection_info['start_box'];
 $box_row = 0;
 $box_column = 0;
 
+echo "<input type=hidden id='collection_id' value='" . $res_collection['id'] . "'>";
+
 while ($row = $result->fetch_assoc()) {
   $rows = 1;
   $extra_forms = [];

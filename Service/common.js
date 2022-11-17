@@ -111,6 +111,7 @@ function poke_update(action, elem){
       sendme = {
         'mon_id' : $(form).find("input#mon_id").attr("value"),
         'extra_form' : $(form).find("input#extra_form").attr("value"),
+        'collection_id' : $('input#collection_id').attr("value"),
       };
       break;
     case "my_catch":
