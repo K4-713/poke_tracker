@@ -123,7 +123,7 @@ function add_monster_in_box($row, $extra_form = false){
   $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' id='owned' onClick=\"poke_update('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
   $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
-  $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd() . "</td></tr>\n";
+  $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd($collected['ball']) . "</td></tr>\n";
   
   $types_out = get_poketype_output($row['type1']);
   if (!is_null($row['type2'])){
@@ -136,18 +136,7 @@ function add_monster_in_box($row, $extra_form = false){
   }
   $add_mon .= "<td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_update('my_catch', this);\" name='my_catch' id='my_catch'></td></tr>\n";
   
-  $ability_dd = "<select name='ability' id='ability' class='ability' onChange=\"poke_update('ability', this);\">\n";
-  $ability_dd .= "<option value=''> - </option>\n";
-  $ability_dd .= "<option value='" . $row['ability1'] . "'>" . $row['ability1'] . "</option>\n";
-  if (!is_null($row['ability2'])){
-    $ability_dd .= "<option value='" . $row['ability2'] . "'>" . $row['ability2'] . "</option>\n";
-  }
-  if (!is_null($row['ability_hidden'])){
-    $ability_dd .= "<option value='" . $row['ability_hidden'] . "'>*" . $row['ability_hidden'] . "</option>\n";
-  }
-  $ability_dd .= "</select>\n"; 
-  
-  $add_mon .= "<tr colspan=4><td class = 'ability'>" . $ability_dd . "</td></tr>\n";
+  $add_mon .= "<tr colspan=4><td class = 'ability'>" . get_ability_dd($row, $collected['ability']) . "</td></tr>\n";
   
   $add_mon .= "</td></tr>";
   
@@ -177,6 +166,32 @@ function get_ball_dd($selected = null){
   }
   $ball_dd .= "</select>\n";
   return $ball_dd;
+}
+
+function get_ability_dd($row, $selected_ability = null){
+  $ability_dd = "<select name='ability' id='ability' class='ability' onChange=\"poke_update('ability', this);\">\n";
+  $ability_dd .= "<option value=''> - </option>\n";
+  $selected = "";
+  if ($row['ability1'] === $selected_ability){
+    $selected = " selected";
+  }
+  $ability_dd .= "<option value='" . $row['ability1'] . "$selected'>" . $row['ability1'] . "</option>\n";
+  if (!is_null($row['ability2'])){
+    $selected = "";
+    if ($row['ability2'] === $selected_ability){
+      $selected = " selected";
+    }
+    $ability_dd .= "<option value='" . $row['ability2'] . "$selected'>" . $row['ability2'] . "</option>\n";
+  }
+  if (!is_null($row['ability_hidden'])){
+    $selected = "";
+    if ($row['ability_hidden'] === $selected_ability){
+      $selected = " selected";
+    }
+    $ability_dd .= "<option value='" . $row['ability_hidden'] . "$selected'>*" . $row['ability_hidden'] . "</option>\n";
+  }
+  $ability_dd .= "</select>\n"; 
+  return $ability_dd;
 }
 
 function is_collected($id, $extra_form){

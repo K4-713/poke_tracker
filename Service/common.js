@@ -71,6 +71,10 @@ function do_ajax_success_stuff(action, data, elem) {
     case "toggle_collection_mine":
       toggle_mine_complete(action, data, elem);
       break;
+    case 'set_collection_ability':
+    case 'set_collection_ball':
+      set_dd_value_complete(action, data, elem);
+      break;
     default:
       console.log(action + " successful. Reload?");
   }
@@ -165,6 +169,12 @@ function toggle_mine_complete(action, data, elem){
   } else {
     $(elem).prop( "checked", true );
   }
+}
+
+function set_dd_value_complete(action, data, elem){
+  $(elem).prop("disabled", false);
+  //lol, maybe
+  $(elem).val(data[0].$(elem).prop("id"));
 }
 
 //to be run on document ready in the box view
