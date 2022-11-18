@@ -170,6 +170,26 @@ function handle_request($data) {
         return_result('failure', "$did 0 rows");
       }
       break;
+    case 'toggle_collection_mine':
+      if (sizeof($data['rows']) !== 1){
+        return_result('failure', "Weird: Expected one row, got " . sizeof($data['rows']));
+      }
+      $mine = check_collection_mon_mine($data['rows'][0]['id']);
+      $did = "";
+      if ($mine) {
+        $did = "Unowned";
+        $data['rows'][0]['my_catch'] = false;
+      } else {
+        $did = "Owned";
+        $data['rows'][0]['my_catch'] = true;
+      }
+      $rowcount = db_query($action, 'update', $data['rows'] );
+      if ($rowcount > 0) {
+        return_result('success', "$did: $rowcount row(s)");
+      } else {
+        return_result('failure', "$did 0 rows");
+      }
+      break;
     default:
       return_result('failure', "Invalid action '$action'");
   }
@@ -203,7 +223,6 @@ function get_table_composite_keys( $table ) {
   if (array_key_exists($table, $composite_keys)){
     return $composite_keys[$table];
   } else {
-    return_result('failure', "No composite keys for table '$table'");
     return false;
   }
 }
@@ -324,6 +343,20 @@ function get_data_model_info($action) {
   $model_info['toggle_collection_owned']['insert'] = query_build($model_info['toggle_collection_owned']['data'], 'insert', $model_info['toggle_collection_owned']['table']);
   $model_info['toggle_collection_owned']['delete'] = query_build($model_info['toggle_collection_owned']['data'], 'delete', $model_info['toggle_collection_owned']['table']);
   
+  
+  $model_info['toggle_collection_mine']['data'] = array(
+      'id' => 'int'
+  );
+  $model_info['toggle_collection_mine']['update'] = array(
+      'query' => "UPDATE collection_mons SET my_catch = ? WHERE id = ?",
+      'binding' => "ii",
+	    'data' => array(
+        'my_catch' => 'bool',
+        'id' => 'int'
+      )
+  );
+  
+  
   //and finally return
   if (array_key_exists($action, $model_info)) {
     return $model_info[$action];
@@ -363,14 +396,16 @@ function db_query($action, $query_type, $data) {
   if ($query_type === "update") {
     $table = $model_info['table'];
     $composite_keys = get_table_composite_keys( $table );
-    //remove the composite keys from the set data
-    $set_data = $data_structure;
-    foreach ($composite_keys as $key => $value) {
-      if (array_key_exists($key, $set_data)){
-        unset($set_data[$key]);
+    if ($composite_keys){
+      //remove the composite keys from the set data
+      $set_data = $data_structure;
+      foreach ($composite_keys as $key => $value) {
+        if (array_key_exists($key, $set_data)){
+          unset($set_data[$key]);
+        }
       }
+      $data_structure = array_merge($set_data, $composite_keys);
     }
-    $data_structure = array_merge($set_data, $composite_keys);
   }
   
   //Try this, kids at home!
@@ -601,6 +636,19 @@ function check_collection_mon_exists($mon_id, $collection_id, $form_extras){
   $query .= " mon_id " . format_raw_query_equivalence($mon_id); 
   $query .= " AND collection_id " . format_raw_query_equivalence($collection_id);
   $query .= " AND form_extras " . format_raw_query_equivalence($form_extras);
+  $count = db_raw_query($query);
+  
+  if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function check_collection_mon_mine($id){
+  $query = "SELECT count(*) as count from collection_mons where";
+  $query .= " id " . format_raw_query_equivalence($id); 
+  $query .= " AND my_catch = true";
   $count = db_raw_query($query);
   
   if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){

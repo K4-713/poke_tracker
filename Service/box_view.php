@@ -131,7 +131,7 @@ function add_monster_in_box($row, $extra_form = false){
   }
   $add_mon .= "<tr><td class='types' colspan=3>" . $types_out . "</td>";
   $checked = "";
-  if (is_array($collected) && $collected['my_catch'] === true){
+  if (is_array($collected) && $collected['my_catch'] == true){
     $checked = "checked";
   }
   $add_mon .= "<td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_update('my_catch', this);\" name='my_catch' id='my_catch'></td></tr>\n";
@@ -179,20 +179,6 @@ function get_ball_dd($selected = null){
   return $ball_dd;
 }
 
-function get_collection_mon_id($row){
-  static $collection_mons = null;
-  if (!is_array($collection_mons)){
-    $db = db_connect();
-    $sql = "SELECT * from collection_mons where collection_id = 1";
-    $result_balls = $db->query($sql);
-    while ($row = $result_balls->fetch_assoc()) {
-      $balls[] = $row;
-    }
-  }
-  
-  //TODO: Stuff
-}
-
 function is_collected($id, $extra_form){
   static $collected = null;
   if (!is_array($collected)){
@@ -204,7 +190,7 @@ function is_collected($id, $extra_form){
     }
   }
   foreach ($collected as $row){
-    if (($row['mon_id'] === $id) && ($row['extra_types'] === $extra_form)){
+    if (($row['mon_id'] === $id) && ($row['form_extras'] === $extra_form)){
       return $row;
     }
   }

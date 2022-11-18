@@ -68,6 +68,9 @@ function do_ajax_success_stuff(action, data, elem) {
     case "toggle_collection_owned":
       toggle_own_complete(action, data, elem);
       break;
+    case "toggle_collection_mine":
+      toggle_mine_complete(action, data, elem);
+      break;
     default:
       console.log(action + " successful. Reload?");
   }
@@ -120,14 +123,14 @@ function poke_update(action, elem){
     case "my_catch":
       backend_action = "toggle_collection_mine";
       sendme.push({
-        'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value")
+        'id' : $(form).find("input#collection_mons_id").attr("value")
       });
       $(elem).prop("disabled", true);
       break;
     case "ability":
       backend_action = "set_collection_ability";
       sendme.push({
-        'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
+        'id' : $(form).find("input#collection_mons_id").attr("value"),
         'ability' : $(form).find("select#ability").val(),
       });
       $(elem).prop("disabled", true);
@@ -135,7 +138,7 @@ function poke_update(action, elem){
     case "ball":
       backend_action = "set_collection_ball";
       sendme.push({
-        'collection_mons_id' : $(form).find("input#collection_mons_id").attr("value"),
+        'id' : $(form).find("input#collection_mons_id").attr("value"),
         'ball' : $(form).find("select#ball").val(),
       });
       $(elem).prop("disabled", true);
@@ -152,6 +155,15 @@ function toggle_own_complete(action, data, elem){
   } else {
     $(elem).prop( "checked", false );
     disable_mon(elem);
+  }
+}
+
+function toggle_mine_complete(action, data, elem){
+  $(elem).prop("disabled", false);
+  if (data.message.includes("Unowned")){
+    $(elem).prop( "checked", false );
+  } else {
+    $(elem).prop( "checked", true );
   }
 }
 
