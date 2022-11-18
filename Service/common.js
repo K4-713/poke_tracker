@@ -27,7 +27,7 @@ function copyText(text, obj) {
     $(obj).parent().addClass('copy_highlighted');
 }
 
-function do_ajax(action, rows, success_callback = false) {
+function do_ajax(action, rows, elem = null) {
     var sendMe = {};
     sendMe.rows = rows;
     sendMe.action = action;
@@ -46,11 +46,7 @@ function do_ajax(action, rows, success_callback = false) {
 	timeout: 10000,
 	success: function (data, status, req) {
 	    if (data.status === 'success') {
-		if (success_callback === false) {
-		    do_ajax_success_stuff(action, data);
-		} else {
-		    callback(success_callback);
-		}
+                do_ajax_success_stuff(action, data, elem);
 	    } else {
 		do_ajax_fail_stuff(action, data.message);
 	    }
@@ -67,8 +63,14 @@ function do_ajax(action, rows, success_callback = false) {
     });
 }
 
-function do_ajax_success_stuff(action, data, extras) {
-    console.log(action + " successful. Reload?");
+function do_ajax_success_stuff(action, data, elem) {
+  switch(action){
+    case "toggle_collection_owned":
+      toggle_own_complete(action, data, elem);
+      break;
+    default:
+      console.log(action + " successful. Reload?");
+  }
 }
 
 function do_ajax_fail_stuff(action, message, extras) {
@@ -139,5 +141,44 @@ function poke_update(action, elem){
       $(elem).prop("disabled", true);
       break;
   }
-  do_ajax(backend_action, sendme);
+  do_ajax(backend_action, sendme, elem);
+}
+
+function toggle_own_complete(action, data, elem){
+  $(elem).prop("disabled", false);
+  if (data.message.includes("Inserted")){
+    $(elem).prop( "checked", true );
+    enable_mon(elem);
+  } else {
+    $(elem).prop( "checked", false );
+    disable_mon(elem);
+  }
+}
+
+//to be run on document ready in the box view
+function box_view_doc_ready(){
+  //get all the owned checkboxes
+  var unowned = $('input#owned:not(:checked)');
+  //window.alert("Found " + unowned.length + " unowned");
+  //for each owned checkbox that isn't checked, disable the mon
+  unowned.each(function (i) {
+    disable_mon(this);
+  });
+}
+
+function disable_mon(elem){
+  var form = $(elem).closest("form");
+  $(form).find("input#my_catch").prop("disabled", true);
+  $(form).find("select#ability").prop("disabled", true);
+  $(form).find("select#ball").prop("disabled", true);
+  $(form).find("table").addClass("disabled");
+}
+
+function enable_mon(elem){
+  var form = $(elem).closest("form");
+  $(form).find("input#my_catch").prop("disabled", false);
+  $(form).find("select#ability").prop("disabled", false);
+  $(form).find("select#ball").prop("disabled", false);
+  $(form).find("table").removeClass("disabled");
+  
 }

@@ -56,6 +56,8 @@ td.name {font-weight:bold; font-size:14px;}
 td.ball {text-align:right;}
 select.ball {width: 30px;}
 
+table.disabled { background-color: #CCCCCC; }
+
 h1, h2 { font-family:Lato, sans-serif; margin-bottom:5px; }
 .left { float:left; clear:none }
 .right { float:right; clear:none }

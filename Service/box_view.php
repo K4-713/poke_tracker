@@ -20,6 +20,7 @@
 require_once('common.php');
 $title = "Box View";
 start_page($title);
+add_document_ready("box_view_doc_ready");
 poke_auth_key();
 
 $db = db_connect();
@@ -119,7 +120,7 @@ function add_monster_in_box($row, $extra_form = false){
   if (is_array($collected)){
     $checked = "checked";
   }
-  $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' onClick=\"poke_update('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
+  $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' id='owned' onClick=\"poke_update('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
   $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
   $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd() . "</td></tr>\n";

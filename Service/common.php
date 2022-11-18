@@ -263,6 +263,13 @@ function start_page($title) {
     echo "<h1>$title</h1>";
 }
 
+function add_document_ready($callback) {
+    login_check();
+    echo "<script>\n"
+    . "$( document ).ready( $callback );"
+    . "</script>\n";
+}
+
 function add_navigation() {
     $links = array(
 	'index.php' => 'National Dex',
