@@ -47,6 +47,7 @@ CREATE TABLE mons (
   dex_galar_crown int(11) DEFAULT NULL,
   dex_sinnoh_bdsp int(11) DEFAULT NULL,
   dex_hisui int(11) DEFAULT NULL,
+  dex_paldea int(11) DEFAULT NULL,
   catchable_xy BOOLEAN DEFAULT NULL,
   catchable_oras BOOLEAN DEFAULT NULL,
   catchable_usum BOOLEAN DEFAULT NULL,

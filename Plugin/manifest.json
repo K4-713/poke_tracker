@@ -29,6 +29,10 @@
 	{
 	    "matches": ["*://*.serebii.net/pokedex-sm/*"],
 	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_g7.js"]
+	},
+	{
+	    "matches": ["*://*.serebii.net/pokedex-sv/*"],
+	    "js": ["libs/jquery-3.4.1.min.js", "config.js", "poke_common.js", "serebii_g8.js"]
 	}
     ],
     "host_permissions": [

@@ -303,6 +303,21 @@ function translate_form(raw_form, natdex){
         return "Galarian";
       }
       break;
+    case "Hisui" :
+    case "Hisuian" :
+      if (natdex >= 899 && natdex <= 904 ){
+        return "Normal"
+      } else {
+        return "Hisuian";
+      }
+      break;
+    case "Paldean" :
+      if (natdex >= 906 && natdex <= 1010 ){
+        return "Normal"
+      } else {
+        return "Paldean";
+      }
+      break;
     case "Kantonian" :
     case "Johtonian" :
     case "Hoennian" :

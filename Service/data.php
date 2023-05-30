@@ -343,7 +343,6 @@ function get_data_model_info($action) {
   $model_info['toggle_collection_owned']['insert'] = query_build($model_info['toggle_collection_owned']['data'], 'insert', $model_info['toggle_collection_owned']['table']);
   $model_info['toggle_collection_owned']['delete'] = query_build($model_info['toggle_collection_owned']['data'], 'delete', $model_info['toggle_collection_owned']['table']);
   
-  
   $model_info['toggle_collection_mine']['data'] = array(
       'id' => 'int'
   );
@@ -352,6 +351,19 @@ function get_data_model_info($action) {
       'binding' => "ii",
 	    'data' => array(
         'my_catch' => 'bool',
+        'id' => 'int'
+      )
+  );
+  
+  $model_info['set_collection_ability']['data'] = array(
+      'id' => 'int',
+      'ability' => 'varchar32'
+  );
+  $model_info['set_collection_ability']['update'] = array(
+      'query' => "UPDATE collection_mons SET ability = ? WHERE id = ?",
+      'binding' => "si",
+	    'data' => array(
+        'ability' => 'varchar32',
         'id' => 'int'
       )
   );

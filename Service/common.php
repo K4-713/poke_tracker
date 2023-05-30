@@ -273,7 +273,7 @@ function add_document_ready($callback) {
 function add_navigation() {
     $links = array(
 	'index.php' => 'National Dex',
-  //      'restock.php' => 'Restock Helper',
+  'box_view.php' => 'Collection - Box View',
 //	'shop_stock.php' => 'All Shop Stock',
 //	'stockpiling.php' => 'Stockpiling and Event Prep',
 //	'gc_buy.php' => 'Gourmet Club - What to Buy',
