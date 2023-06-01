@@ -114,6 +114,7 @@ function handle_request($data) {
       break;
     case 'g7_dex':
     case 'g8_dex':
+    case 'g9_dex':
       $insert_count = 0;
       $update_count = 0;
       foreach ($data['rows'] as $key => $value){
@@ -249,6 +250,33 @@ function get_data_model_info($action) {
   );
   $model_info['natdex_index']['insert_update'] = query_build($model_info['natdex_index']['data'], 'insert_update', 'mons');
 
+  
+  /** g9_dex **/
+  $model_info['g9_dex']['data'] = array(
+      'name' => 'varchar_32',
+      'dex_national' => 'int',
+      'region' => 'varchar_16|null',
+      'form' => 'varchar_32|null',
+      'type1' => 'varchar_16',
+      'type2' => 'varchar_16|null',
+      'ability1' => 'varchar_32',
+      'ability2' => 'varchar_32|null',
+      'ability_hidden' => 'varchar_32|null',
+      'b_att' => 'int',
+      'b_def' => 'int',
+      'b_hp' => 'int',
+      'b_sp_att' => 'int',
+      'b_sp_def' => 'int',
+      'b_speed' => 'int',
+      'female' => 'number|null',
+      'male' => 'number|null',
+      'egg_groups' => 'varchar_32|null',
+      'dex_paldea' => 'int|null',
+      'catchable_sv' => 'bool|null',
+  );
+  $model_info['g9_dex']['table'] = "mons";
+  $model_info['g9_dex']['insert'] = query_build($model_info['g9_dex']['data'], 'insert', $model_info['g9_dex']['table']);
+  $model_info['g9_dex']['update'] = query_build($model_info['g9_dex']['data'], 'update', $model_info['g9_dex']['table']);
   
   /** g8_dex **/
   $model_info['g8_dex']['data'] = array(

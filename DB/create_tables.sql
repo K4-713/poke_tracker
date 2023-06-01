@@ -54,6 +54,7 @@ CREATE TABLE mons (
   catchable_swsh BOOLEAN DEFAULT NULL,
   catchable_bdsp BOOLEAN DEFAULT NULL,
   catchable_pla BOOLEAN DEFAULT NULL,
+  catchable_sv BOOLEAN DEFAULT NULL,
   box_order int(11) DEFAULT NULL,
   box_hide BOOLEAN DEFAULT NULL,
   strong_dimorphism BOOLEAN DEFAULT NULL,

@@ -147,7 +147,8 @@ function is_region(variant){
     "Kalosian",
     "Galarian",
     "Alolan", "Alola",
-    "Hisuian"
+    "Hisuian",
+    "Paldean"
   ];
   return regional_forms.includes(variant);
 }

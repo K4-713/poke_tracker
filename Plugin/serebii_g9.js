@@ -123,14 +123,8 @@ $(document).ready(function () {
         female : gender_ratios['Female'],
         male : gender_ratios['Male'],
         egg_groups : get_egg_group_string(),
-        dex_galar: (dex_numbers['Galar'] || null),
-        dex_galar_isle: (dex_numbers['Isle of Armor'] || null),
-        dex_galar_crown: (dex_numbers['Crown Tundra'] || null),
-        dex_sinnoh_bdsp: (dex_numbers['Sinnoh'] || null),
-        dex_hisui: (dex_numbers['Hisui'] || null),
-        catchable_swsh: (catchable[variants[i]].catchable_swsh || null),
-        catchable_bdsp: (catchable[variants[i]].catchable_bdsp || null),
-        catchable_pla: (catchable[variants[i]].catchable_pla || null),
+        dex_paldea: (dex_numbers['Paldea'] || null),
+        catchable_sv: (catchable[variants[i]].catchable_sv || null),
       });
       li_fillet += "<li>" + variants[i] + "</li>"; //...wait for it...
     }
@@ -149,7 +143,7 @@ $(document).ready(function () {
 
 function send_it_on_home(mons){
   console.log("CLICK");
-  do_ajax('g8_dex', mons);
+  do_ajax('g9_dex', mons);
 }
 
 function add_image_info(images, monster_name){
@@ -565,9 +559,7 @@ function get_catchable(variants){
   var ret = [];
   for(var i=0; i<variants.length; ++i){
     ret[variants[i]] = {
-      catchable_swsh : false,
-      catchable_bdsp : false,
-      catchable_pla : false,
+      catchable_sv : false
     };
   };
   
@@ -617,6 +609,16 @@ function get_catchable(variants){
               if ($(locations).find("a").length > 0){ //links mean yes! I think.
                 //set the normal one to true
                 ret[normal_form].catchable_pla = true;
+              }
+            }
+            break;
+          case "sv":
+            if (variants.includes("Paldean")){
+              ret["Paldean"].catchable_sv = true;
+            } else {
+              if ($(locations).find("a").length > 0){ //links mean yes! I think.
+                //set the normal one to true
+                ret[normal_form].catchable_sv = true;
               }
             }
             break;
