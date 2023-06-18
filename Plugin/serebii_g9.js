@@ -445,6 +445,10 @@ function get_abilities(natdex){
         }
       });
       ret[variant] = build_me;
+      if (natdex === 128){
+        ret["Paldean|Aqua"] = ret["Paldean|Combat"];
+        ret["Paldean|Blaze"] = ret["Paldean|Combat"];
+      }
     } else {
       console.error("No abilities found!");
     }
