@@ -309,6 +309,9 @@ function translate_form(raw_form, natdex){
       if (natdex >= 906 && natdex <= 1010 ){
         return "Normal"
       } else {
+        if (natdex === 128){
+          return "Paldean|Combat";
+        }
         return "Paldean";
       }
       break;
@@ -340,6 +343,22 @@ function translate_form(raw_form, natdex){
             }
           }
           return ret_me;
+          break;
+        case 25:
+          //fuck pikachu "cap" forms
+          console.log("Translating Pikachu " + raw_form);
+          if (raw_form.includes(" Cap")){
+            return "Normal";
+          }
+          return raw_form;
+          break;
+        case 128:
+          raw_form = raw_form.replace(" Breed", "");
+          raw_form = raw_form.replace("Paldean", "Paldean|");
+          if (!raw_form.includes("Paldean") && raw_form !== "Normal" ) {
+            raw_form = "Paldean|" + raw_form;
+          }
+          return raw_form;
           break;
         default:
           return raw_form;
@@ -527,6 +546,10 @@ function get_stats(natdex){
       }
     } else {
       go = false;
+    }
+    if (natdex === 128){ // :[
+      ret["Paldean|Blaze"] = ret["Paldean|Combat"];
+      ret["Paldean|Aqua"] = ret["Paldean|Combat"];
     }
   }
   return ret;
