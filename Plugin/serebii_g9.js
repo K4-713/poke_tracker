@@ -365,6 +365,12 @@ function translate_form(raw_form, natdex){
           raw_form = raw_form.replace(" Rotom", "");
           return raw_form;
           break;
+        case 550:
+          if (raw_form === "White-Striped"){
+            raw_form = "Hisuian|" + raw_form;
+          }
+          return raw_form;
+          break;
         default:
           return raw_form;
       }
@@ -457,6 +463,22 @@ function get_abilities(natdex){
     } else {
       console.error("No abilities found!");
     }
+    
+    if (natdex === 550){
+      
+      console.log("I GOT TO THIS POINT yo");
+      
+      var sames = {
+        ability2: ret["Red-Striped"].ability2,
+        ability_hidden: ret["Red-Striped"].ability_hidden
+      }
+      
+      //not really scraping at this point, but w/e
+      ret["Blue-Striped"] = { ability1: "Rock Head", ...sames};
+      ret["Hisuian|White-Striped"] = { ability1: "Rattled", ...sames};
+      
+    }
+    
     return ret;
 }
 
