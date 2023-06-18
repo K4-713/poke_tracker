@@ -320,7 +320,8 @@ function translate_form(raw_form, natdex){
     case "Hoennian" :
     case "Unovan" :
     case "Kalosian" :
-    case monster_name, "":
+    case monster_name:
+    case "":
       return "Normal";
       break;
     default :
@@ -358,6 +359,10 @@ function translate_form(raw_form, natdex){
           if (!raw_form.includes("Paldean") && raw_form !== "Normal" ) {
             raw_form = "Paldean|" + raw_form;
           }
+          return raw_form;
+          break;
+        case 479:
+          raw_form = raw_form.replace(" Rotom", "");
           return raw_form;
           break;
         default:
@@ -554,6 +559,13 @@ function get_stats(natdex){
     if (natdex === 128){ // :[
       ret["Paldean|Blaze"] = ret["Paldean|Combat"];
       ret["Paldean|Aqua"] = ret["Paldean|Combat"];
+    }
+    if ( natdex === 479 ){
+      ret["Fan"] = ret["Alternates"];
+      ret["Frost"] = ret["Alternates"];
+      ret["Heat"] = ret["Alternates"];
+      ret["Mow"] = ret["Alternates"];
+      ret["Wash"] = ret["Alternates"];
     }
   }
   return ret;
