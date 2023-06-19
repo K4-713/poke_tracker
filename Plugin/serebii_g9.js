@@ -371,6 +371,10 @@ function translate_form(raw_form, natdex){
           }
           return raw_form;
           break;
+        case 1007:
+        case 1008:
+          return "Normal";
+          break;
         default:
           return raw_form;
       }
