@@ -274,6 +274,7 @@ function add_navigation() {
     $links = array(
 	'index.php' => 'National Dex',
   'box_view.php' => 'Collection - Box View',
+  'ha_needed.php' => 'HA Needed',
 //	'shop_stock.php' => 'All Shop Stock',
 //	'stockpiling.php' => 'Stockpiling and Event Prep',
 //	'gc_buy.php' => 'Gourmet Club - What to Buy',
