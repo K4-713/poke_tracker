@@ -216,6 +216,25 @@ function handle_request($data) {
         return_result('failure', "$did 0 rows");
       }
       break;
+    case 'set_collection_ability':
+      if (sizeof($data['rows']) !== 1){
+        return_result('failure', "Weird: Expected one row, got " . sizeof($data['rows']));
+      }
+      $did = "Updated";
+      if (array_key_exists('ability', $data['rows'][0]) && $data['rows'][0]['ability'] !== ""){
+        $rowcount = db_query($action, 'update', $data['rows'] );
+      } else {
+        //unset the ability
+        $did = "Unset Ability,";
+        $rowcount = db_query($action, 'delete', $data['rows'] );
+      }
+
+      if ($rowcount > 0) {
+        return_result('success', "$did: $rowcount row(s)");
+      } else {
+        return_result('failure', "$did 0 rows");
+      }
+      break;
     default:
       return_result('failure', "Invalid action '$action'");
   }
@@ -417,6 +436,13 @@ function get_data_model_info($action) {
       'binding' => "si",
 	    'data' => array(
         'ability' => 'varchar_32',
+        'id' => 'int'
+      )
+  );
+  $model_info['set_collection_ability']['delete'] = array(
+      'query' => "UPDATE collection_mons SET ability = NULL WHERE id = ?",
+      'binding' => "i",
+	    'data' => array(
         'id' => 'int'
       )
   );

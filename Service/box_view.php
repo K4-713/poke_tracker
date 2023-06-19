@@ -175,20 +175,20 @@ function get_ability_dd($row, $selected_ability = null){
   if ($row['ability1'] === $selected_ability){
     $selected = " selected";
   }
-  $ability_dd .= "<option value='" . $row['ability1'] . "$selected'>" . $row['ability1'] . "</option>\n";
+  $ability_dd .= "<option value='" . $row['ability1'] . "' $selected>" . $row['ability1'] . "</option>\n";
   if (!is_null($row['ability2'])){
     $selected = "";
     if ($row['ability2'] === $selected_ability){
       $selected = " selected";
     }
-    $ability_dd .= "<option value='" . $row['ability2'] . "$selected'>" . $row['ability2'] . "</option>\n";
+    $ability_dd .= "<option value='" . $row['ability2'] . "' $selected>" . $row['ability2'] . "</option>\n";
   }
   if (!is_null($row['ability_hidden'])){
     $selected = "";
     if ($row['ability_hidden'] === $selected_ability){
       $selected = " selected";
     }
-    $ability_dd .= "<option value='" . $row['ability_hidden'] . "$selected'>*" . $row['ability_hidden'] . "</option>\n";
+    $ability_dd .= "<option value='" . $row['ability_hidden'] . "' $selected>*" . $row['ability_hidden'] . "</option>\n";
   }
   $ability_dd .= "</select>\n"; 
   return $ability_dd;
