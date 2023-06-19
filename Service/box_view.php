@@ -123,7 +123,7 @@ function add_monster_in_box($row, $extra_form = false){
   $add_mon .= "<tr><td class='check'><input type='checkbox' $checked class='cbo' id='owned' onClick=\"poke_update('owned', this);\"></td><td class='name' colspan=2>$namestring</td>";
   $add_mon .= "<td class = 'dex'>#" . $row['dex_national'] . "</td></tr>\n";
   $add_mon .= "<tr><td class='region_form' colspan=2>" . $rf_string . "</td>";
-  $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd($collected['ball']) . "</td></tr>\n";
+  $add_mon .= "<td class='ball' colspan=2>" . get_ball_dd($collected['ball_id']) . "</td></tr>\n";
   
   $types_out = get_poketype_output($row['type1']);
   if (!is_null($row['type2'])){
@@ -158,8 +158,8 @@ function get_ball_dd($selected = null){
   $ball_dd = "<select name='ball' id='ball' class='ball' onChange=\"poke_update('ball', this);\">\n";
   $ball_dd .= "<option value=''> - </option>\n";
   foreach ($balls as $ball){
-    if ($selected && $selected = $ball['name']){
-      $ball_dd .= "<option value=" . $ball['name'] ." selected>" . $ball['image'] . "</option>\n";
+    if ($selected && $selected === $ball['id']){
+      $ball_dd .= "<option value=" . $ball['name'] ." selected>" . $ball['name'] . "</option>\n";
     } else {
       $ball_dd .= "<option value=" . $ball['name'] .">" . $ball['name'] . "</option>\n";
     }

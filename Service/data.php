@@ -195,6 +195,27 @@ function handle_request($data) {
         return_result('failure', "$did 0 rows");
       }
       break;
+    case 'set_collection_ball':
+      if (sizeof($data['rows']) !== 1){
+        return_result('failure', "Weird: Expected one row, got " . sizeof($data['rows']));
+      }
+      $did = "Updated";
+      if (array_key_exists('ball', $data['rows'][0]) && $data['rows'][0]['ball'] !== ""){
+        $qdata = $data['rows'];
+        $qdata[0]['ball_id'] = get_ball_id($qdata[0]['ball']);
+        $rowcount = db_query($action, 'update', $qdata );
+      } else {
+        //unset the ball
+        $did = "Unset Ball,";
+        $rowcount = db_query($action, 'delete', $data['rows'] );
+      }
+
+      if ($rowcount > 0) {
+        return_result('success', "$did: $rowcount row(s)");
+      } else {
+        return_result('failure', "$did 0 rows");
+      }
+      break;
     default:
       return_result('failure', "Invalid action '$action'");
   }
@@ -389,13 +410,33 @@ function get_data_model_info($action) {
   
   $model_info['set_collection_ability']['data'] = array(
       'id' => 'int',
-      'ability' => 'varchar32'
+      'ability' => 'varchar_32'
   );
   $model_info['set_collection_ability']['update'] = array(
       'query' => "UPDATE collection_mons SET ability = ? WHERE id = ?",
       'binding' => "si",
 	    'data' => array(
-        'ability' => 'varchar32',
+        'ability' => 'varchar_32',
+        'id' => 'int'
+      )
+  );
+  
+  $model_info['set_collection_ball']['data'] = array(
+      'id' => 'int',
+      'ball' => 'varchar_32'
+  );
+  $model_info['set_collection_ball']['update'] = array(
+      'query' => "UPDATE collection_mons SET ball_id = ? WHERE id = ?",
+      'binding' => "ii",
+	    'data' => array(
+        'ball_id' => 'int',
+        'id' => 'int'
+      )
+  );
+  $model_info['set_collection_ball']['delete'] = array(
+      'query' => "UPDATE collection_mons SET ball_id = NULL WHERE id = ?",
+      'binding' => "i",
+	    'data' => array(
         'id' => 'int'
       )
   );
@@ -711,6 +752,18 @@ function check_collection_mon_mine($id){
   
   if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){
     return true;
+  } else {
+    return false;
+  }
+}
+
+function get_ball_id($ball_name){
+  $query = "SELECT id from balls where";
+  $query .= " name " . format_raw_query_equivalence($ball_name); 
+  $id = db_raw_query($query);
+  
+  if (array_key_exists('id', $id[0])){
+    return $id[0]['id'];
   } else {
     return false;
   }
