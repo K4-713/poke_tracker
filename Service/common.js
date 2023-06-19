@@ -155,7 +155,7 @@ function toggle_own_complete(action, data, elem){
   $(elem).prop("disabled", false);
   if (data.message.includes("Inserted")){
     $(elem).prop( "checked", true );
-    enable_mon(elem);
+    enable_mon(elem, data);
   } else {
     $(elem).prop( "checked", false );
     disable_mon(elem);
@@ -190,17 +190,29 @@ function box_view_doc_ready(){
 
 function disable_mon(elem){
   var form = $(elem).closest("form");
+  $(form).find("input#collection_mons_id").remove();
   $(form).find("input#my_catch").prop("disabled", true);
   $(form).find("select#ability").prop("disabled", true);
   $(form).find("select#ball").prop("disabled", true);
   $(form).find("table").addClass("disabled");
 }
 
-function enable_mon(elem){
+function enable_mon(elem, data = false){
   var form = $(elem).closest("form");
   $(form).find("input#my_catch").prop("disabled", false);
   $(form).find("select#ability").prop("disabled", false);
   $(form).find("select#ball").prop("disabled", false);
   $(form).find("table").removeClass("disabled");
+  if (data){
+    console.log("Data! woot.");
+    console.log(data);
+    $('<input type="hidden">').attr({
+      id: 'collection_mons_id',
+      name: 'collection_mons_id',
+      value: data.data.id
+    }).insertAfter($(form).find("input#extra_form"));
+  } else {
+    console.log("No data");
+  }
   
 }

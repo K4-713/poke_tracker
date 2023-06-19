@@ -166,7 +166,11 @@ function handle_request($data) {
         $did = "Inserted";
       }
       if ($rowcount > 0) {
-        return_result('success', "$did: $rowcount row(s)");
+        $cmon_id = null;
+        if ($did === "Inserted"){
+          $cmon_id = get_collection_mon_id($data['rows'][0]['mon_id'], $data['rows'][0]['collection_id'], $data['rows'][0]['form_extras_id']);
+        }
+        return_result('success', "$did: $rowcount row(s)", ["id" => $cmon_id]);
       } else {
         return_result('failure', "$did 0 rows");
       }
@@ -666,6 +670,20 @@ function check_mon_exists($name, $region = null, $form = null){
   
   if (array_key_exists('count', $count[0]) && $count[0]['count'] > 0 ){
     return true;
+  } else {
+    return false;
+  }
+}
+
+function get_collection_mon_id($mon_id, $collection_id, $form_extras){
+  $query = "SELECT id from collection_mons where";
+  $query .= " mon_id " . format_raw_query_equivalence($mon_id); 
+  $query .= " AND collection_id " . format_raw_query_equivalence($collection_id);
+  $query .= " AND form_extras " . format_raw_query_equivalence($form_extras);
+  $res = db_raw_query($query);
+  
+  if (array_key_exists('id', $res[0])){
+    return $res[0]['id'];
   } else {
     return false;
   }
