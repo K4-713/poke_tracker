@@ -465,9 +465,6 @@ function get_abilities(natdex){
     }
     
     if (natdex === 550){
-      
-      console.log("I GOT TO THIS POINT yo");
-      
       var sames = {
         ability2: ret["Red-Striped"].ability2,
         ability_hidden: ret["Red-Striped"].ability_hidden
@@ -476,7 +473,19 @@ function get_abilities(natdex){
       //not really scraping at this point, but w/e
       ret["Blue-Striped"] = { ability1: "Rock Head", ...sames};
       ret["Hisuian|White-Striped"] = { ability1: "Rattled", ...sames};
+    }
+    
+    if (natdex === 931){
+      var sames = {
+        ability1: "Intimidate",
+        ability2: "Hustle"
+      }
       
+      //not really scraping at this point, but w/e
+      ret["Green Plumage"] = { ability_hidden: "Guts", ...sames};
+      ret["Blue Plumage"] = { ability_hidden: "Guts", ...sames};
+      ret["Yellow Plumage"] = { ability_hidden: "Sheer Force", ...sames};
+      ret["White Plumage"] = { ability_hidden: "Sheer Force", ...sames};
     }
     
     return ret;
