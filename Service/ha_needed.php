@@ -23,7 +23,7 @@ start_page($title);
 
 $db = db_connect();
 
-$sql = "select dex_national, name, region, form, ability_hidden, male, female from mons "
+$sql = "select dex_national, name, region, form, ability_hidden, male, female, collection_mons.form_extras from mons "
         . "left join collection_mons on mons.id = collection_mons.mon_id "
         . "where mons.ability_hidden IS NOT NULL "
         . "and mons.box_hide is not true "
@@ -38,9 +38,10 @@ $report = array();
 $table_structure = array(
     'dex_national' => '#',
     'name' => 'Name',
+    'ability_hidden' => "Hidden Ability",
     'region' => 'Region',
     'form' => 'Form',
-    'ability_hidden' => "Hidden Ability",
+    'form_extras' => 'Form Extras',
     'blank_1' => NULL,
     'female' => "% Female",
     'male' => "% Male",
