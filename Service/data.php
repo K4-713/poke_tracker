@@ -155,6 +155,9 @@ function handle_request($data) {
       if (sizeof($data['rows']) !== 1){
         return_result('failure', "Weird: Expected one row, got " . sizeof($data['rows']));
       }
+      if ($data['rows'][0]['form_extras'] === ''){
+        $data['rows'][0]['form_extras'] = null;
+      }
       $exists = check_collection_mon_exists($data['rows'][0]['mon_id'], $data['rows'][0]['collection_id'], $data['rows'][0]['form_extras']);
       $did = "";
       $rowcount = "";
