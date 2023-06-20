@@ -210,7 +210,7 @@ function enable_mon(elem, data = false){
       id: 'collection_mons_id',
       name: 'collection_mons_id',
       value: data.data.id
-    }).insertAfter($(form).find("input#extra_form"));
+    }).insertAfter($(form).find("input#form_extras"));
   } else {
     console.log("No data");
   }
