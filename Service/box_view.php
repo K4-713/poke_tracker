@@ -83,7 +83,7 @@ while ($row = $result->fetch_assoc()) {
 function add_monster_in_box($row, $extra_form = false){
   $add_mon = "<form id='" . $row['id'] . "' name='" . $row['id'] . "'>";
   $add_mon .= "<input type='hidden' name='mon_id' id='mon_id' value='" . $row['id'] . "'>";
-  $add_mon .= "<input type='hidden' name='extra_form' id='extra_form' value='" . $extra_form . "'>";
+  $add_mon .= "<input type='hidden' name='form_extras' id='form_extras' value='" . $extra_form . "'>";
   $collected = is_collected($row['id'], $extra_form);
   if (is_array($collected)){
     $add_mon .= "<input type='hidden' name='collection_mons_id' id='collection_mons_id' value='" . $collected['id'] . "'>";

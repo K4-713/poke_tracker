@@ -119,7 +119,7 @@ function poke_update(action, elem){
       backend_action = "toggle_collection_owned";
       sendme.push({
         'mon_id' : $(form).find("input#mon_id").attr("value"),
-        'extra_form' : $(form).find("input#extra_form").attr("value"),
+        'form_extras' : $(form).find("input#form_extras").attr("value"),
         'collection_id' : $('input#collection_id').attr("value"),
       });
       $(elem).prop("disabled", true);
