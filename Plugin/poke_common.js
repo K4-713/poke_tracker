@@ -466,3 +466,15 @@ function get_next_number_link(number){
   console.log("Returning no link");
   return false;
 }
+
+/** Keeping track of all the mons that have actual differences beyond the cosmetic in their gender forms.
+ */
+function has_full_gendered_form(natdex){
+  switch(natdex){
+    case 678:
+      return true;
+      break;
+    default:
+      return false;
+  }
+}

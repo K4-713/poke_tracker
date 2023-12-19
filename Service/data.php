@@ -319,6 +319,8 @@ function get_data_model_info($action) {
       'male' => 'number|null',
       'egg_groups' => 'varchar_32|null',
       'dex_paldea' => 'int|null',
+      'dex_paldea_kk' => 'int|null',
+      'dex_paldea_bb' => 'int|null',
       'catchable_sv' => 'bool|null',
   );
   $model_info['g9_dex']['table'] = "mons";

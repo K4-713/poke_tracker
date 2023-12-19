@@ -124,6 +124,8 @@ $(document).ready(function () {
         male : gender_ratios['Male'],
         egg_groups : get_egg_group_string(),
         dex_paldea: (dex_numbers['Paldea'] || null),
+        dex_paldea_kk: (dex_numbers['Kitakami'] || null),
+        dex_paldea_bb: (dex_numbers['Blueberry'] || null),
         catchable_sv: (catchable[variants[i]].catchable_sv || null),
       });
       li_fillet += "<li>" + variants[i] + "</li>"; //...wait for it...
@@ -263,8 +265,13 @@ function get_variants(natdex){
       }
     });
   } else {
-    console.log("No variant types. Whew");
-    ret.push('Normal');
+    if (has_full_gendered_form(natdex)){
+      ret.push('Female');
+      ret.push('Male');
+    } else {
+      console.log("No variant types. Whew");
+      ret.push('Normal');
+    }
   }
 
   //if there's no "Normal" in there, change the global synonym.
@@ -410,6 +417,9 @@ function get_types(natdex){
       var type_links = types.children("a");
       ret[normal_form] = get_types_from_links(type_links);
     }
+    if (has_full_gendered_form(natdex) && !ret.hasOwnProperty('Male')){
+      ret['Male'] = ret[normal_form];
+    }
     return ret;
 }
 
@@ -426,6 +436,11 @@ function get_types_from_links(links){
 //This is gonna get ugly.
 function get_abilities(natdex){
   var ret = [];
+  
+  if (has_full_gendered_form(natdex)){
+    return get_gendered_abilities(natdex);
+  }
+  
     var maybe_abilities = $("table.dextable").eq(2).find("tr").eq(1).find("b");
     
     if(maybe_abilities.length > 0){
@@ -493,6 +508,40 @@ function get_abilities(natdex){
     }
     
     return ret;
+}
+
+function get_gendered_abilities(natdex){
+  var maybe_abilities = $("table.dextable").eq(2).find("tr").eq(1).find("a");
+    
+    if(maybe_abilities.length > 0){
+      var build_me = {};  
+      var ret = [];
+      maybe_abilities.each(function (i) {
+        var whole_line = $(this).text().trim();
+        var maybe_ability = $(this).find("b").text().trim();
+
+        //If there's a gender marker, it's a hidden ability. At least, it is for the single case I'm handling. :/.
+        if (whole_line.includes("(Female)")){
+          ret["Female"] = { ability_hidden: maybe_ability, ...build_me};
+          return;
+        }
+        if (whole_line.includes("(Male)")){
+          ret["Male"] = { ability_hidden: maybe_ability, ...build_me};
+          return;
+        }
+
+        //If we're still here, it's just an ability. Enjoy it.
+        if ((build_me.ability1 || false)){
+          build_me.ability2 = maybe_ability;
+        } else {
+          build_me.ability1 = maybe_ability;
+        }
+      });
+      return ret;
+    } else {
+      console.error("No abilities found! (Gender Version)");
+    }
+    return [];
 }
 
 //Get all the different dex numbers, stuff them in an array
@@ -603,6 +652,9 @@ function get_stats(natdex){
       ret["Wash"] = ret["Alternates"];
     }
   }
+  if (has_full_gendered_form(natdex) && !ret.hasOwnProperty("Male")){
+    ret["Male"] = ret["Female"];
+  }
   return ret;
 }
 
@@ -703,6 +755,10 @@ function get_catchable(variants){
   } else {
     console.error("No location data found");
     return false;
+  }
+  
+  if (normal_form === "Female"){ //cheap, but w/e: We don't have natdex here.
+    ret["Male"] = ret["Female"];
   }
   
   return ret;
