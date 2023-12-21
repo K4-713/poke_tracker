@@ -260,7 +260,7 @@ function get_variants(natdex){
     console.log("Found some variants!");
     variants.each(function (i) {
       var add_me_maybe = translate_form($(this).text().trim(), natdex);
-      if (ret.indexOf(add_me_maybe) === -1){ //unique it. #869
+      if (ret.indexOf(add_me_maybe) === -1 && add_me_maybe !== " Type"){ //unique it. #869
         ret.push(add_me_maybe);
       }
     });
@@ -381,6 +381,22 @@ function translate_form(raw_form, natdex){
         case 1007:
         case 1008:
           return "Normal";
+          break;
+        case 901:
+          if (raw_form === "Bloodmoon"){
+            raw_form = "Blood Moon";
+          }
+          return raw_form;
+          break;
+        case 1017:
+          raw_form = raw_form.replace("Tera", "");
+          return raw_form;
+          break;
+        case 774:
+          if (raw_form === "Meteorite"){
+            raw_form = "Meteor";
+          }
+          return raw_form;
           break;
         default:
           return raw_form;
@@ -650,6 +666,10 @@ function get_stats(natdex){
       ret["Heat"] = ret["Alternates"];
       ret["Mow"] = ret["Alternates"];
       ret["Wash"] = ret["Alternates"];
+    }
+    if ( natdex === 774 ){
+      //unset core? I guess?
+      delete ret["Core"];
     }
   }
   if (has_full_gendered_form(natdex) && !ret.hasOwnProperty("Male")){
