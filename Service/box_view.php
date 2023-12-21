@@ -23,14 +23,32 @@ start_page($title);
 add_document_ready("box_view_doc_ready");
 poke_auth_key();
 
+$collections = array(
+  1 => array(
+    'name' => 'National Living Dex',
+    'sql_checklist' => "SELECT * from mons WHERE box_hide IS NOT true ORDER BY dex_national ASC, box_order ASC, region ASC, form ASC"
+  ),
+  2 => array(
+    'name' => 'Paldean Complete Dex',
+    'sql_checklist' => "SELECT * from mons WHERE box_hide IS NOT true AND (dex_paldea IS NOT NULL OR dex_paldea_kk IS NOT NULL OR dex_paldea_bb IS NOT NULL) ORDER BY -dex_paldea DESC, -dex_paldea_kk DESC, -dex_paldea_bb DESC, box_order ASC, region ASC, form ASC"
+  ),
+);
+
+
+$collection = 1;
+$params = poke_url_params();
+if (array_key_exists('collection', $params) && array_key_exists($params['collection'], $collections)) {
+    $collection = $params['collection'];
+}
+
 $db = db_connect();
 
-$sql = "SELECT * from collections WHERE name = 'National Living Dex'";
+$sql = "SELECT * from collections WHERE name = '" . $collections[$collection]['name'] ."'";
 $res_collection = $db->query($sql);
 $collection_info = $res_collection->fetch_assoc();
 echo $collection_info['name'] . ", " . $collection_info['location'] . "<br>";
 
-$sql = "SELECT * from mons WHERE box_hide IS NOT true ORDER BY dex_national ASC, box_order ASC, region ASC, form ASC";
+$sql = $collections[$collection]['sql_checklist']; //this should really just be in the db.
 $result = $db->query($sql);
 echo ($result->num_rows . " monsters retrieved <br>");
 
@@ -195,10 +213,11 @@ function get_ability_dd($row, $selected_ability = null){
 }
 
 function is_collected($id, $extra_form){
+  global $collection;
   static $collected = null;
   if (!is_array($collected)){
     $db = db_connect();
-    $sql = "SELECT * from collection_mons WHERE collection_id = 1"; //TODO: a dynamic.
+    $sql = "SELECT * from collection_mons WHERE collection_id = $collection";
     $result_collected = $db->query($sql);
     while ($row = $result_collected->fetch_assoc()) {
       $collected[] = $row;
