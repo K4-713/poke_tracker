@@ -225,9 +225,30 @@ function enable_mon(elem, data = false){
   
 function style_mon(elem){
   var form = $(elem).closest("form");
+  
+  $(form).find("table").removeClass("needs_ability");
+  $(form).find("table").removeClass("needs_ball");
+  $(form).find("table").removeClass("needs_both");
+  
   needs_hidden_ability = $(form).find("input#needs_hidden_ability").val();
-  if (needs_hidden_ability === "1"){
+  ball_tier = $(form).find("input#ball_tier").val();
+  needs_better_ball = true;
+  if (ball_tier !== "" && ball_tier <= 3){
+    needs_better_ball = false;
+  }
+  
+  if (needs_hidden_ability === "1" && needs_better_ball === true){
+    $(form).find("table").addClass("needs_both");
+  }
+  
+  if (needs_hidden_ability === "1" && needs_better_ball === false){
     $(form).find("table").addClass("needs_ability");
   }
+  
+  
+  if (needs_hidden_ability === "0" && needs_better_ball === true){
+    $(form).find("table").addClass("needs_ball");
+  }
+  
 }
   

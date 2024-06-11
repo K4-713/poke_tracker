@@ -179,14 +179,19 @@ function get_ball_dd($selected = null){
   
   $ball_dd = "<select name='ball' id='ball' class='ball' onChange=\"poke_update('ball', this);\">\n";
   $ball_dd .= "<option value=''> - </option>\n";
+  $ball_tier = false;
   foreach ($balls as $ball){
     if ($selected && $selected === $ball['id']){
       $ball_dd .= "<option value=" . $ball['name'] ." selected>" . $ball['name'] . "</option>\n";
+      $ball_tier = $ball['tier'];
     } else {
       $ball_dd .= "<option value=" . $ball['name'] .">" . $ball['name'] . "</option>\n";
     }
   }
   $ball_dd .= "</select>\n";
+  
+  //now add the "needs improvement" indicator...
+  $ball_dd .= "<input type='hidden' name='ball_tier' id='ball_tier' value='" . $ball_tier . "'>\n"; 
   return $ball_dd;
 }
 
