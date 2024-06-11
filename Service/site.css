@@ -57,6 +57,9 @@ td.ball {text-align:right;}
 select.ball {width: 30px;}
 
 table.disabled { background-color: #CCCCCC; }
+table.needs_ball { background-color: #DDFFCC; }
+table.needs_ability { background-color: #DDCCff; }
+table.needs_both { background-color: #FFD055; }
 
 h1, h2 { font-family:Lato, sans-serif; margin-bottom:5px; }
 .left { float:left; clear:none }

@@ -186,6 +186,13 @@ function box_view_doc_ready(){
   unowned.each(function (i) {
     disable_mon(this);
   });
+  
+  //and style the rest?
+  var owned = $('input#owned:checked');
+  owned.each(function (i) {
+    style_mon(this);
+  });
+  
 }
 
 function disable_mon(elem){
@@ -214,5 +221,13 @@ function enable_mon(elem, data = false){
   } else {
     console.log("No data");
   }
-  
 }
+  
+function style_mon(elem){
+  var form = $(elem).closest("form");
+  needs_hidden_ability = $(form).find("input#needs_hidden_ability").val();
+  if (needs_hidden_ability === "1"){
+    $(form).find("table").addClass("needs_ability");
+  }
+}
+  

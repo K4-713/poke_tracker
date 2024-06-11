@@ -32,6 +32,10 @@ $collections = array(
     'name' => 'Paldean Complete Dex',
     'sql_checklist' => "SELECT * from mons WHERE box_hide IS NOT true AND (dex_paldea IS NOT NULL OR dex_paldea_kk IS NOT NULL OR dex_paldea_bb IS NOT NULL) ORDER BY -dex_paldea DESC, -dex_paldea_kk DESC, -dex_paldea_bb DESC, box_order ASC, region ASC, form ASC"
   ),
+  3 => array(
+    'name' => 'Paldea DLC Dex',
+    'sql_checklist' => "SELECT * from mons WHERE box_hide IS NOT true AND dex_paldea IS NULL AND (dex_paldea_kk IS NOT NULL OR dex_paldea_bb IS NOT NULL) ORDER BY -dex_paldea_kk DESC, -dex_paldea_bb DESC, box_order ASC, region ASC, form ASC"
+  ),
 );
 
 
@@ -201,14 +205,20 @@ function get_ability_dd($row, $selected_ability = null){
     }
     $ability_dd .= "<option value='" . $row['ability2'] . "' $selected>" . $row['ability2'] . "</option>\n";
   }
+  $needs_hidden_flag = 0;
   if (!is_null($row['ability_hidden'])){
+    $needs_hidden_flag = 1;
     $selected = "";
     if ($row['ability_hidden'] === $selected_ability){
+      $needs_hidden_flag = 0;
       $selected = " selected";
     }
     $ability_dd .= "<option value='" . $row['ability_hidden'] . "' $selected>*" . $row['ability_hidden'] . "</option>\n";
   }
-  $ability_dd .= "</select>\n"; 
+  $ability_dd .= "</select>\n";
+  
+  //now add the "needs improvement" indicator...
+  $ability_dd .= "<input type='hidden' name='needs_hidden_ability' id='needs_hidden_ability' value='" . $needs_hidden_flag . "'>\n"; 
   return $ability_dd;
 }
 
