@@ -174,7 +174,10 @@ function toggle_mine_complete(action, data, elem){
 function set_dd_value_complete(action, data, elem){
   $(elem).prop("disabled", false);
   //lol, maybe
-  $(elem).val(data[0].$(elem).prop("id"));
+  if (data[0]) {
+    $(elem).val(data[0].$(elem).prop("id"));
+  }
+  style_mon(elem);
 }
 
 //to be run on document ready in the box view
@@ -230,23 +233,33 @@ function style_mon(elem){
   $(form).find("table").removeClass("needs_ball");
   $(form).find("table").removeClass("needs_both");
   
-  needs_hidden_ability = $(form).find("input#needs_hidden_ability").val();
+  hidden_ability = $(form).find("input#hidden_ability").val();
+  console.log(hidden_ability);
+  
+  needs_hidden_ability = false;
+  if (hidden_ability !== ""){
+    selected_ability = $(form).find("select#ability").val();
+    if ($(form).find("select#ability").val() !== hidden_ability){
+      needs_hidden_ability = true;
+    }
+  }
+  
   ball_tier = $(form).find("input#ball_tier").val();
   needs_better_ball = true;
   if (ball_tier !== "" && ball_tier <= 3){
     needs_better_ball = false;
   }
   
-  if (needs_hidden_ability === "1" && needs_better_ball === true){
+  if (needs_hidden_ability && needs_better_ball){
     $(form).find("table").addClass("needs_both");
   }
   
-  if (needs_hidden_ability === "1" && needs_better_ball === false){
+  if (needs_hidden_ability && !needs_better_ball){
     $(form).find("table").addClass("needs_ability");
   }
   
   
-  if (needs_hidden_ability === "0" && needs_better_ball === true){
+  if (!needs_hidden_ability && needs_better_ball){
     $(form).find("table").addClass("needs_ball");
   }
   

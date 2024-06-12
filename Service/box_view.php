@@ -222,8 +222,8 @@ function get_ability_dd($row, $selected_ability = null){
   }
   $ability_dd .= "</select>\n";
   
-  //now add the "needs improvement" indicator...
-  $ability_dd .= "<input type='hidden' name='needs_hidden_ability' id='needs_hidden_ability' value='" . $needs_hidden_flag . "'>\n"; 
+  //This will help us figure out if this thing should be a color
+  $ability_dd .= "<input type='hidden' name='hidden_ability' id='hidden_ability' value='" . $row['ability_hidden'] . "'>\n"; 
   return $ability_dd;
 }
 
