@@ -53,8 +53,8 @@ select.ability { padding:0px; width:160px;}
 td.dex { width:30px; text-align:right; }
 td.check { width:20px; text-align:right; }
 td.name {font-weight:bold; font-size:14px;}
-td.ball {text-align:right;}
-select.ball {width: 30px;}
+td.ball {text-align:right; height:20px;}
+select.ball {width: 50px; font-size:10px;}
 
 table.disabled { background-color: #CCCCCC; }
 table.needs_ball { background-color: #DDFFCC; }
@@ -101,6 +101,7 @@ div.dragon { background-color:#0030b9; }
 div.dark { background-color:#000000; }
 
 img.inline { height: 14px; padding-left: 3px; float: right; padding-right: 0px;}
+img.inline-left { height: 14px; padding-right: 3px; float: left; padding-left: 0px;}
 
 svg.graph { background-color:#f5f5f5; margin:30px; padding:20px }
 path { stroke:#000000; fill:none }

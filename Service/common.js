@@ -234,7 +234,6 @@ function style_mon(elem){
   $(form).find("table").removeClass("needs_both");
   
   hidden_ability = $(form).find("input#hidden_ability").val();
-  console.log(hidden_ability);
   
   needs_hidden_ability = false;
   if (hidden_ability !== ""){
@@ -244,7 +243,20 @@ function style_mon(elem){
     }
   }
   
-  ball_tier = $(form).find("input#ball_tier").val();
+  //get ball image and tier for selected ball
+  selected_ball_opt = $(form).find("select#ball").children().filter(':selected');
+  
+  ball_tier = $(selected_ball_opt).attr("tier");
+  ball_image = $(selected_ball_opt).attr("image");
+  
+  if(ball_image !== undefined){
+    var ball_td = $(selected_ball_opt).closest("td.ball");
+    ball_td.css('background-image', 'url(./Images/Balls/' + ball_image + ')');
+    ball_td.css('background-repeat', 'no-repeat');
+    ball_td.css('background-position', '16px center');
+    ball_td.css('background-size', '19px 19px')
+  }
+  
   needs_better_ball = true;
   if (ball_tier !== "" && ball_tier <= 3){
     needs_better_ball = false;
