@@ -276,4 +276,24 @@ function style_mon(elem){
   }
   
 }
+
+window.onmouseup = function() { highlighter() };
+window.onscroll = function() { highlighter() };
+
+function highlighter() {
+  //reset everything
+  $(".searched").removeClass('searched');
+  
+  var thing = document.getSelection().toString();
+    if (thing.length > 0){
+      //highlight something
+      console.log(thing);
+      var elems = $("td.name:contains('" + thing + "')").each(function() {
+        console.log($(this).text());
+        var form = $(this).closest("form");
+        $(form).find("table.mon").addClass("searched");
+      });
+    }
+}
+
   
