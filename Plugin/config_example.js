@@ -20,4 +20,4 @@ var data_auth_key = 'api_key';
 
 //Should point to the server where you're hosting the PHP "service"
 //Needs to be https to successfully log data from secure sites
-var service_url = 'https://poke.hownottospellwinnebago.com';
+var service_url = 'https://your.website.com';
