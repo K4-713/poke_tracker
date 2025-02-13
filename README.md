@@ -1,10 +1,10 @@
 # POKE TRACKER
-For the moment when a that fiendishly complicated spreadsheet was no longer sufficient for my personal monster tracking needs.
+For the moment when that fiendishly complicated spreadsheet was no longer sufficient for my personal monster tracking needs.
 
 # Disclaimer
 This is not pretty. As it is entirely for me (and not for you), I wasn't ever necessarily going for beauty, or any kind of universally-accepted measures of goodness. I wrote this whole mess by hand with minimal dependencies and two things in mind: To explore the feasibility of a use case where scraping a bunch of data from specific places on the web and shoving it into a relational database would be cooler and more fun than manual data entry, and to track all my boxed monster collections.
 
-Also, do not judge me for having no tests. I already feel lowkey bad about it, but it's not like I have any users, so I can only disappoint myself.
+Also, do not judge me for having no tests. I already feel lowkey bad about it, but it's not like I have any users, so my bugs can only disappoint myself.
 
 ## Current Capabilities
 ### Scrapey Chrome Plugin
@@ -23,4 +23,3 @@ Also, do not judge me for having no tests. I already feel lowkey bad about it, b
 * Set up / edit new collections through the website, as opposed to adding new collections to the database directly
 * Fix up some problems with particular monster forms / gender dimorphism / hidden abilities
 * Add more features to the UI instead of requiring clairvoyance (or at least memories of last time I edited anything)
-* Remove cruft from what was obviously a different personal project that this mutated out of
