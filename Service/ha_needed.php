@@ -27,6 +27,7 @@ $sql = "select dex_national, name, region, form, ability_hidden, male, female, c
         . "left join collection_mons on mons.id = collection_mons.mon_id "
         . "where mons.ability_hidden IS NOT NULL "
         . "and mons.box_hide is not true "
+        . "and collection_mons.collection_id = 1 "
         . "and (not (mons.ability_hidden = collection_mons.ability) OR collection_mons.ability IS NULL)  "
         . "ORDER BY mons.dex_national ASC";
 $result = $db->query($sql);
