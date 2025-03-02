@@ -20,8 +20,6 @@ $(document).ready(function () {
     document.body.style.border = "2px solid yellow";
     console.log("THIS IS YOUR EXTENSION. Helloooo.");
     add_dealie_to_page("This is a dealie.");
-
-    kill_ads();
     
     var sendMe = [];
 
@@ -92,13 +90,6 @@ function parse_natdex_row(tr){
   console.log(row_data);
  
   return row_data;
-}
-
-function kill_ads() {
-  var banner = $('div#content div');
-  var underbanner = $('div#nn_sticky');
-  disappear(banner);
-  disappear(underbanner);
 }
 
 function do_ajax_fail_stuff(action, message) {

@@ -21,8 +21,6 @@ $(document).ready(function () {
   console.log("THIS IS YOUR EXTENSION. Helloooo.");
   add_dealie_to_page("This is a dealie.");
 
-  kill_ads();
-
   var sendMe = [];
 
   //first two tables are legends, and the last one is mythical
@@ -82,13 +80,6 @@ function parse_legends_row(tr, mythical = false) {
   console.log(ret);
 
   return ret;
-}
-
-function kill_ads() {
-  var banner = $('div#content div');
-  var underbanner = $('div#nn_sticky');
-  disappear(banner);
-  disappear(underbanner);
 }
 
 function do_ajax_fail_stuff(action, message) {

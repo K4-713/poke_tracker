@@ -26,8 +26,6 @@ $(document).ready(function () {
     add_dealie_to_page("This is a dealie.", 3);
     add_button_to_dealie("Download Images", download_images, pane = 2);
     unset_dealie_css('height');
-
-    kill_ads();
     
     //grab the monster's name. Try second "dextable" -> second tr, first immediate td 
     monster_name = $("table.dextable").eq(1).find("tr").eq(1).children("td").eq(0).text().trim();
@@ -203,14 +201,6 @@ function get_img_final_name(maybe_image, poke_name){
   }
   final_name += ".png";  //wfm
   return final_name;
-}
-
-function kill_ads() {
-  var banner = $('div#content div');
-  var underbanner = $('div#nn_sticky');
-  disappear(banner);
-  disappear(underbanner);
-  
 }
 
 function do_ajax_fail_stuff(action, message) {
